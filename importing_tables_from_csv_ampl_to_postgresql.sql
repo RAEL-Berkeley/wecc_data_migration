@@ -1,9 +1,9 @@
-﻿SET search_path TO switch_wecc_pyomo;
+﻿SET search_path TO switch;
 
 -- Note: all files where located in switch-db2.erg.berkeley.edu
 -- psql commands where done from command line
--- \connect switch_wecc2;
--- set search_path  to switch_wecc_pyomo;
+-- \connect switch_wecc;
+-- set search_path  to switch;
 -- switch-workstna:switch_wecc_migration_to_python_2017 pehidalg$ rsync -avzr tables_from_mysql switch-db2.erg.berkeley.edu:/var/tmp/home_pehidalg/
 
 ---------------------------------------------------------------------------
@@ -37,7 +37,7 @@ DELIMITER ',' CSV HEADER;
 -- [Note from Josiah] data needed: existing_local_td -- ans: ok for now. Revisit sunk costs after first batch of runs
 -- [Note] data needs revision: local_td_annual_cost_per_mw, reserves_area. ans: this is ok!
 insert into load_zone
-select area_id as load_zone_id, load_area as name, 'place holder' as description, ccs_distance_km as ccs_distance_km,
+select area_id as load_zone_id, load_area as name, NULL as description, ccs_distance_km as ccs_distance_km,
 0 as existing_local_td, local_td_new_annual_payment_per_mw as local_td_annual_cost_per_mw, primary_nerc_subregion as reserves_area
 from ampl_load_area_info_v3;
 

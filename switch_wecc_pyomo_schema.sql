@@ -6,20 +6,19 @@
 
 -- SWITCH schema
 
--- drop SCHEMA switch_wecc_pyomo cascade;
+-- drop SCHEMA switch cascade;
 
 
-CREATE SCHEMA switch_wecc_pyomo;
-COMMENT ON SCHEMA switch_wecc_pyomo
+CREATE SCHEMA switch;
+COMMENT ON SCHEMA switch
   IS 'This schema contains core tables for use with SWITCH-pyomo. All major "data blocks", such as projects, load zones, 
   fuel prices, etc, are indexed by scenario ids. 
   These are used in the scenarios_switch table to set up different SWITCH scenarios that you can run.
    A script called get_switch_input_tables.py reads those keys and constructs input tables according to the specified 
    scenarios ids.';
-set search_path = switch_wecc_pyomo;
+set search_path = switch;
 
 
-set search_path = switch_wecc_pyomo;
 -----------------------------
 -- Timescales
 -----------------------------
@@ -131,7 +130,7 @@ COMMENT ON COLUMN sampled_timeseries.scaling_to_period
 
 CREATE TABLE sampled_timepoint
 (
-  raw_timepoint_id smallint PRIMARY KEY REFERENCES raw_timepoint,
+  raw_timepoint_id integer PRIMARY KEY REFERENCES raw_timepoint,
   study_timeframe_id smallint REFERENCES study_timeframe,
   time_sample_id smallint REFERENCES time_sample,
   sampled_timeseries_id smallint REFERENCES sampled_timeseries,
