@@ -94,13 +94,29 @@ COPY ampl_study_timepoints
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_study_timepoints.csv'  
 DELIMITER ',' CSV HEADER;
 
-insert into raw_timeseries values (1, 1, 0, NULL,NULL, 2011, 2051, 'Every hour of all years in [2011, 2051]. Need to put actual num_timepoints');
+-- Divide the raw timeseries from the legacy database into 1-year blocks for convenient sampling.
+insert into raw_timeseries 
+SELECT timepoint_year - 2010 as raw_timeseries_id,
+	1 as hours_per_tp,
+	count(*) as num_timepoints,
+	min(datetime_utc) as first_timepoint_utc,
+	max(datetime_utc) as last_timepoint_utc,
+	timepoint_year as start_year,
+	timepoint_year as end_year,
+	NULL as description
+from ampl_study_timepoints 
+where timepoint_year >= 2011 and 
+	timepoint_year <= 2051 
+group by timepoint_year
+order by timepoint_year;
 
--- total timepoints 359400
 insert into raw_timepoint
-select timepoint_id as raw_timepoint_id, 1 as raw_timeseries_id, datetime_utc as timestamp_utc
+select timepoint_id as raw_timepoint_id, 
+	timepoint_year - 2010 as raw_timeseries_id, 
+	datetime_utc as timestamp_utc
 from ampl_study_timepoints
-where timepoint_year >= 2011 and timepoint_year <= 2051 order by raw_timepoint_id;
+where timepoint_year >= 2011 and timepoint_year <= 2051 
+order by raw_timepoint_id;
 
 
 ---------------------------------------------------------------------------
