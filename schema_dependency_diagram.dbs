@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="PostgreSQL" id="Project_3b7b882e" template="Default" database="PostgreSQL" >
+	<schema name="switch_wecc_pyomo" catalogname="switch_wecc2" schemaname="switch_wecc_pyomo" >
+		<table name="demand_scenario" >
+			<column name="demand_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="varchar" length="30" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="demand_scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="demand_scenario_id" />
+			</index>
+		</table>
+		<table name="demand_timeseries" >
+			<comment><![CDATA[Hourly demands in MW per load zone. Contains different demand scenarios. Note, the load_zone_name and 
+  timestamp_utc are redundant with data in load_zone and raw_timepoint, and are provided for convenience. 
+  The foreign key checks ensure these redundant data values match the data in their primary tables.]]></comment>
+			<column name="load_zone_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="demand_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="raw_timepoint_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="load_zone_name" type="varchar" length="30" decimal="0" jt="12" />
+			<column name="timestamp_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<column name="demand_mw" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<index name="demand_timeseries_pkey" unique="PRIMARY_KEY" >
+				<column name="load_zone_id" />
+				<column name="demand_scenario_id" />
+				<column name="raw_timepoint_id" />
+			</index>
+			<fk name="demand_timeseries_demand_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="demand_scenario" >
+				<fk_column name="demand_scenario_id" pk="demand_scenario_id" />
+			</fk>
+			<fk name="demand_timeseries_load_zone_id_fkey" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="load_zone_id" pk="load_zone_id" />
+			</fk>
+			<fk name="demand_timeseries_load_zone_id_fkey1" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="load_zone_id" pk="load_zone_id" />
+				<fk_column name="load_zone_name" pk="name" />
+			</fk>
+			<fk name="demand_timeseries_raw_timepoint_id_fkey" to_schema="switch_wecc_pyomo" to_table="raw_timepoint" >
+				<fk_column name="raw_timepoint_id" pk="raw_timepoint_id" />
+			</fk>
+			<fk name="demand_timeseries_raw_timepoint_id_fkey1" to_schema="switch_wecc_pyomo" to_table="raw_timepoint" >
+				<fk_column name="raw_timepoint_id" pk="raw_timepoint_id" />
+				<fk_column name="timestamp_utc" pk="timestamp_utc" />
+			</fk>
+		</table>
+		<table name="energy_source" >
+			<comment><![CDATA[Contains fuels and non-fuel energy sources such as Solar or Wind. Fuels should specify their CO2 intensities, 
+  and non-fuel energy sources should leave those columns empty.]]></comment>
+			<column name="name" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="is_fuel" type="bool" length="1" decimal="0" jt="-7" mandatory="y" />
+			<column name="co2_intensity" type="float8" length="17" decimal="17" jt="6" />
+			<column name="upstream_co2_intensity" type="float8" length="17" decimal="17" jt="6" />
+			<index name="energy_source_pkey" unique="PRIMARY_KEY" >
+				<column name="name" />
+			</index>
+		</table>
+		<table name="fuel_simple_price" >
+			<comment><![CDATA[Yearly averaged prices for fuels without the complexity of a supply curve.]]></comment>
+			<column name="fuel" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="fuel_simple_price_scenario_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="load_zone_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="load_zone_name" type="varchar" length="30" decimal="0" jt="12" />
+			<column name="projection_year" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="fuel_price" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<fk name="fuel_simple_price_fuel_fkey" to_schema="switch_wecc_pyomo" to_table="energy_source" >
+				<fk_column name="fuel" pk="name" />
+			</fk>
+			<fk name="fuel_simple_price_fuel_simple_price_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="fuel_simple_price_scenario" >
+				<fk_column name="fuel_simple_price_scenario_id" pk="fuel_simple_price_scenario_id" />
+			</fk>
+			<fk name="fuel_simple_price_load_zone_id_fkey" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="load_zone_id" pk="load_zone_id" />
+			</fk>
+			<fk name="fuel_simple_price_load_zone_id_fkey1" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="load_zone_id" pk="load_zone_id" />
+				<fk_column name="load_zone_name" pk="name" />
+			</fk>
+		</table>
+		<table name="fuel_simple_price_scenario" >
+			<column name="fuel_simple_price_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="fuel_simple_price_scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="fuel_simple_price_scenario_id" />
+			</index>
+		</table>
+		<table name="generation_plant" >
+			<comment><![CDATA[Defines generation and/or storage projects. These may denote individual generating units, a power plant 
+  that includes several generating units, or an aggregation of several different plants that can be dispatched 
+  together without regard for unit commitment considerations. The columns without NOT NULL constraints are optional, 
+  and should only be populated if that field is relevant for a particular generation project.]]></comment>
+			<column name="generation_plant_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="name" type="varchar" length="40" decimal="0" jt="12" mandatory="y" />
+			<column name="gen_tech" type="varchar" length="60" decimal="0" jt="12" mandatory="y" />
+			<column name="load_zone_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="connect_cost_per_mw" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<column name="capacity_limit_mw" type="float8" length="17" decimal="17" jt="6" />
+			<column name="variable_o_m" type="float8" length="17" decimal="17" jt="6" />
+			<column name="forced_outage_rate" type="float8" length="17" decimal="17" jt="6" />
+			<column name="scheduled_outage_rate" type="float8" length="17" decimal="17" jt="6" />
+			<column name="full_load_heat_rate" type="float8" length="17" decimal="17" jt="6" />
+			<column name="hydro_efficiency" type="float8" length="17" decimal="17" jt="6" />
+			<column name="max_age" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="min_build_capacity" type="float8" length="17" decimal="17" jt="6" />
+			<column name="is_variable" type="bool" length="1" decimal="0" jt="-7" mandatory="y" />
+			<column name="is_baseload" type="bool" length="1" decimal="0" jt="-7" mandatory="y" />
+			<column name="is_cogen" type="bool" length="1" decimal="0" jt="-7" >
+				<defo>false</defo>
+			</column>
+			<column name="energy_source" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="unit_size" type="float8" length="17" decimal="17" jt="6" />
+			<column name="storage_efficiency" type="float8" length="17" decimal="17" jt="6" />
+			<column name="store_to_release_ratio" type="float8" length="17" decimal="17" jt="6" />
+			<column name="min_load_fraction" type="float8" length="17" decimal="17" jt="6" />
+			<column name="startup_fuel" type="float8" length="17" decimal="17" jt="6" />
+			<column name="startup_om" type="float8" length="17" decimal="17" jt="6" />
+			<column name="ccs_capture_efficiency" type="float8" length="17" decimal="17" jt="6" />
+			<column name="ccs_energy_load" type="float8" length="17" decimal="17" jt="6" />
+			<index name="generation_plant_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_id" />
+			</index>
+			<fk name="generation_plant_energy_source_fkey" to_schema="switch_wecc_pyomo" to_table="energy_source" >
+				<fk_column name="energy_source" pk="name" />
+			</fk>
+			<fk name="generation_plant_load_zone_id_fkey" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="load_zone_id" pk="load_zone_id" />
+			</fk>
+		</table>
+		<table name="generation_plant_cost" >
+			<column name="generation_plant_cost_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="generation_plant_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="build_year" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="fixed_o_m" type="float8" length="17" decimal="17" jt="6" />
+			<column name="overnight_cost" type="float8" length="17" decimal="17" jt="6" />
+			<index name="generation_plant_cost_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_cost_scenario_id" />
+				<column name="generation_plant_id" />
+				<column name="build_year" />
+			</index>
+			<fk name="generation_plant_cost_generation_plant_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant" >
+				<fk_column name="generation_plant_id" pk="generation_plant_id" />
+			</fk>
+			<fk name="generation_plant_cost_generation_plant_cost_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant_cost_scenario" >
+				<fk_column name="generation_plant_cost_scenario_id" pk="generation_plant_cost_scenario_id" />
+			</fk>
+		</table>
+		<table name="generation_plant_cost_scenario" >
+			<column name="generation_plant_cost_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="generation_plant_cost_scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_cost_scenario_id" />
+			</index>
+		</table>
+		<table name="generation_plant_existing_and_planned" >
+			<comment><![CDATA[Describes existing and planned projects according to the year they came online (build_year), and the capacity 
+  that was brought online in that year.]]></comment>
+			<column name="generation_plant_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="build_year" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="generation_plant_existing_and_planned_scenario_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="capacity" type="float8" length="17" decimal="17" jt="6" >
+				<comment><![CDATA[Nameplate capacity in MW.]]></comment>
+			</column>
+			<index name="generation_plant_existing_and_planned_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_id" />
+				<column name="build_year" />
+			</index>
+			<fk name="generation_plant_existing_and_planned_generation_plant_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant" >
+				<fk_column name="generation_plant_id" pk="generation_plant_id" />
+			</fk>
+			<fk name="generation_plant_existing_and_generation_plant_existing_an_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant_existing_and_planned_scenario" >
+				<fk_column name="generation_plant_existing_and_planned_scenario_id" pk="generation_plant_existing_and_planned_scenario_id" />
+			</fk>
+		</table>
+		<table name="generation_plant_existing_and_planned_scenario" >
+			<column name="generation_plant_existing_and_planned_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="generation_plant_existing_and_planned_scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_existing_and_planned_scenario_id" />
+			</index>
+		</table>
+		<table name="generation_plant_scenario" >
+			<comment><![CDATA[Defines which set of generation projects to include in a particular SWITCH optimization. Use this to 
+  enable/disable projects, aggregate projects for faster planning simulations without unit commitment, etc.]]></comment>
+			<column name="generation_plant_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="generation_plant_scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_scenario_id" />
+			</index>
+		</table>
+		<table name="generation_plant_scenario_member" >
+			<column name="generation_plant_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="generation_plant_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<index name="generation_plant_scenario_member_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_scenario_id" />
+				<column name="generation_plant_id" />
+			</index>
+			<fk name="generation_plant_scenario_member_generation_plant_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant" >
+				<fk_column name="generation_plant_id" pk="generation_plant_id" />
+			</fk>
+			<fk name="generation_plant_scenario_mem_generation_plant_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant_scenario" >
+				<fk_column name="generation_plant_scenario_id" pk="generation_plant_scenario_id" />
+			</fk>
+		</table>
+		<table name="hydro_flow_data" >
+			<column name="hydro_simple_scenario_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="generation_plant_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="sampled_timeseries_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="hydro_min_flow_mw" type="float8" length="17" decimal="17" jt="6" />
+			<column name="hydro_avg_flow_mw" type="float8" length="17" decimal="17" jt="6" />
+			<fk name="hydro_flow_data_generation_plant_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant" >
+				<fk_column name="generation_plant_id" pk="generation_plant_id" />
+			</fk>
+			<fk name="hydro_flow_data_hydro_simple_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="hydro_simple_scenario" >
+				<fk_column name="hydro_simple_scenario_id" pk="hydro_simple_scenario_id" />
+			</fk>
+			<fk name="hydro_flow_data_sampled_timeseries_id_fkey" to_schema="switch_wecc_pyomo" to_table="sampled_timeseries" >
+				<fk_column name="sampled_timeseries_id" pk="sampled_timeseries_id" />
+			</fk>
+		</table>
+		<table name="hydro_simple_scenario" >
+			<column name="hydro_simple_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="hydro_simple_scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="hydro_simple_scenario_id" />
+			</index>
+		</table>
+		<table name="load_zone" >
+			<column name="load_zone_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<column name="ccs_distance_km" type="float8" length="17" decimal="17" jt="6" />
+			<column name="existing_local_td" type="float8" length="17" decimal="17" jt="6" />
+			<column name="local_td_annual_cost_per_mw" type="float8" length="17" decimal="17" jt="6" />
+			<column name="reserves_area" type="varchar" length="20" decimal="0" jt="12" />
+			<index name="load_zone_pkey" unique="PRIMARY_KEY" >
+				<column name="load_zone_id" />
+			</index>
+			<index name="load_zone_load_zone_id_name_key" unique="UNIQUE" >
+				<column name="load_zone_id" />
+				<column name="name" />
+			</index>
+		</table>
+		<table name="period" >
+			<comment><![CDATA[Defines investment periods within a given study timeframe. These are block of time in which investment can 
+  occur and are typically between 1 and 10 years long. Each period is linked to one or more raw timeseries.]]></comment>
+			<column name="period_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="start_year" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="label" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="length_yrs" type="smallint" length="5" decimal="0" jt="5" />
+			<index name="period_pkey" unique="PRIMARY_KEY" >
+				<column name="period_id" />
+			</index>
+			<index name="period_study_timeframe_id_period_id_key" unique="UNIQUE" >
+				<column name="study_timeframe_id" />
+				<column name="period_id" />
+			</index>
+			<fk name="period_study_timeframe_id_fkey" to_schema="switch_wecc_pyomo" to_table="study_timeframe" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+			</fk>
+		</table>
+		<table name="period_all_timeseries" >
+			<comment><![CDATA[The raw timeseries that describe operational conditions in this period. For statistical purposes, this is the 
+  population of time-based data to sample from. Raw timeseries may be shared across different study timeframes. 
+  If all of the raw timeseries are bootstrapped from a single year of historical data, then you would only include 
+  one year in a given period (even if the period is several years long) because including more years won't provide 
+  more diversity of renewable outputs.]]></comment>
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="period_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="raw_timeseries_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<index name="period_all_timeseries_pkey" unique="PRIMARY_KEY" >
+				<column name="study_timeframe_id" />
+				<column name="period_id" />
+				<column name="raw_timeseries_id" />
+			</index>
+			<index name="period_all_timeseries_period_id_raw_timeseries_id_key" unique="UNIQUE" >
+				<column name="period_id" />
+				<column name="raw_timeseries_id" />
+			</index>
+			<fk name="period_all_timeseries_period_id_fkey" to_schema="switch_wecc_pyomo" to_table="period" >
+				<fk_column name="period_id" pk="period_id" />
+			</fk>
+			<fk name="period_all_timeseries_study_timeframe_id_fkey1" to_schema="switch_wecc_pyomo" to_table="period" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+				<fk_column name="period_id" pk="period_id" />
+			</fk>
+			<fk name="period_all_timeseries_raw_timeseries_id_fkey" to_schema="switch_wecc_pyomo" to_table="raw_timeseries" >
+				<fk_column name="raw_timeseries_id" pk="raw_timeseries_id" />
+			</fk>
+			<fk name="period_all_timeseries_study_timeframe_id_fkey" to_schema="switch_wecc_pyomo" to_table="study_timeframe" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+			</fk>
+		</table>
+		<table name="raw_timepoint" >
+			<column name="raw_timepoint_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="raw_timeseries_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="timestamp_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<index name="raw_timepoint_pkey" unique="PRIMARY_KEY" >
+				<column name="raw_timepoint_id" />
+			</index>
+			<index name="raw_timepoint_raw_timepoint_id_timestamp_utc_key" unique="UNIQUE" >
+				<column name="raw_timepoint_id" />
+				<column name="timestamp_utc" />
+			</index>
+			<index name="raw_timepoint_raw_timeseries_id_timestamp_utc_key" unique="UNIQUE" >
+				<column name="raw_timeseries_id" />
+				<column name="timestamp_utc" />
+			</index>
+			<fk name="raw_timepoint_raw_timeseries_id_fkey" to_schema="switch_wecc_pyomo" to_table="raw_timeseries" >
+				<fk_column name="raw_timeseries_id" pk="raw_timeseries_id" />
+			</fk>
+		</table>
+		<table name="raw_timeseries" >
+			<comment><![CDATA[A sequence of future timepoints for which you have projections of operational data: loads, renewable output, 
+  hydro availability, ... each of those timeseries will be defined over this sequence of timepoints. 
+  These datasets can be reused across different studies that may have different specifications of study 
+  periods (ex. 1-year periods for short-term studies, 5-year periods for long-term studies). 
+  Each raw_timeseries will typically be one year long, but they can technically be of any length.]]></comment>
+			<column name="raw_timeseries_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="hours_per_tp" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<column name="num_timepoints" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="first_timepoint_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<column name="last_timepoint_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<column name="start_year" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="end_year" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="raw_timeseries_pkey" unique="PRIMARY_KEY" >
+				<column name="raw_timeseries_id" />
+			</index>
+		</table>
+		<table name="sampled_timepoint" >
+			<comment><![CDATA[A set of sampled timepoints, organized into timeseries. Redundant index columns are intentional to allow 
+  faster queries.]]></comment>
+			<column name="raw_timepoint_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="time_sample_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="sampled_timeseries_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="period_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="timestamp_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<index name="sampled_timepoint_pkey" unique="PRIMARY_KEY" >
+				<column name="raw_timepoint_id" />
+			</index>
+			<fk name="sampled_timepoint_period_id_fkey" to_schema="switch_wecc_pyomo" to_table="period" >
+				<fk_column name="period_id" pk="period_id" />
+			</fk>
+			<fk name="sampled_timepoint_raw_timepoint_id_fkey" to_schema="switch_wecc_pyomo" to_table="raw_timepoint" >
+				<fk_column name="raw_timepoint_id" pk="raw_timepoint_id" />
+			</fk>
+			<fk name="sampled_timepoint_sampled_timeseries_id_fkey" to_schema="switch_wecc_pyomo" to_table="sampled_timeseries" >
+				<fk_column name="sampled_timeseries_id" pk="sampled_timeseries_id" />
+			</fk>
+			<fk name="sampled_timepoint_study_timeframe_id_fkey1" to_schema="switch_wecc_pyomo" to_table="sampled_timeseries" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+				<fk_column name="time_sample_id" pk="time_sample_id" />
+				<fk_column name="sampled_timeseries_id" pk="sampled_timeseries_id" />
+			</fk>
+			<fk name="sampled_timepoint_study_timeframe_id_fkey" to_schema="switch_wecc_pyomo" to_table="study_timeframe" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+			</fk>
+			<fk name="sampled_timepoint_time_sample_id_fkey" to_schema="switch_wecc_pyomo" to_table="time_sample" >
+				<fk_column name="time_sample_id" pk="time_sample_id" />
+			</fk>
+		</table>
+		<table name="sampled_timeseries" >
+			<comment><![CDATA[A representative sampling from all available timeseries in this study timeframe. Redundant index columns are 
+  intentional to allow faster queries.]]></comment>
+			<column name="sampled_timeseries_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="time_sample_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="period_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="name" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="hours_per_tp" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<column name="num_timepoints" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="first_timepoint_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<column name="last_timepoint_utc" type="timestamp" length="29" decimal="6" jt="93" />
+			<column name="scaling_to_period" type="float8" length="17" decimal="17" jt="6" mandatory="y" >
+				<comment><![CDATA[The number of times conditions like this are expected to occur in the period. 
+  The sum of hours_per_tp * num_timepoints * scaling_to_period for all timeseries in a period should equal the 
+  number of hours in that period.]]></comment>
+			</column>
+			<index name="sampled_timeseries_pkey" unique="PRIMARY_KEY" >
+				<column name="sampled_timeseries_id" />
+			</index>
+			<index name="sampled_timeseries_study_timeframe_id_time_sample_id_sample_key" unique="UNIQUE" >
+				<column name="study_timeframe_id" />
+				<column name="time_sample_id" />
+				<column name="sampled_timeseries_id" />
+			</index>
+			<fk name="sampled_timeseries_period_id_fkey" to_schema="switch_wecc_pyomo" to_table="period" >
+				<fk_column name="period_id" pk="period_id" />
+			</fk>
+			<fk name="sampled_timeseries_study_timeframe_id_fkey" to_schema="switch_wecc_pyomo" to_table="study_timeframe" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+			</fk>
+			<fk name="sampled_timeseries_study_timeframe_id_fkey1" to_schema="switch_wecc_pyomo" to_table="time_sample" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+				<fk_column name="time_sample_id" pk="time_sample_id" />
+			</fk>
+			<fk name="sampled_timeseries_time_sample_id_fkey" to_schema="switch_wecc_pyomo" to_table="time_sample" >
+				<fk_column name="time_sample_id" pk="time_sample_id" />
+			</fk>
+		</table>
+		<table name="scenario" >
+			<comment><![CDATA[This table defines the simulation parameters for a Switch Pyomo run. The get_switch_input_tables.sh 
+    script pulls the chosen data into the tab and dat files the model requires. It parses command line arguments 
+    and looks for the "s" option, which specifies the simulations scenario. That id is used as a key to read this 
+    table and extract all other ids. All of the id columns reference the tables where the parameters are described. 
+    They will update if you update those values and will raise an error when you try to delete an id that is still 
+    being used in some scenario in this table.]]></comment>
+			<column name="scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="varchar" length="50" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="time_sample_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="demand_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="fuel_simple_price_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="generation_plant_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="generation_plant_cost_scenario_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="generation_plant_existing_and_planned_scenario_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="hydro_simple_scenario_id" type="smallint" length="5" decimal="0" jt="5" />
+			<index name="scenario_pkey" unique="PRIMARY_KEY" >
+				<column name="scenario_id" />
+			</index>
+			<fk name="scenario_demand_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="demand_scenario" >
+				<fk_column name="demand_scenario_id" pk="demand_scenario_id" />
+			</fk>
+			<fk name="scenario_fuel_simple_price_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="fuel_simple_price_scenario" >
+				<fk_column name="fuel_simple_price_scenario_id" pk="fuel_simple_price_scenario_id" />
+			</fk>
+			<fk name="scenario_generation_plant_cost_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant_cost_scenario" >
+				<fk_column name="generation_plant_cost_scenario_id" pk="generation_plant_cost_scenario_id" />
+			</fk>
+			<fk name="scenario_generation_plant_existing_and_planned_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant_existing_and_planned_scenario" >
+				<fk_column name="generation_plant_existing_and_planned_scenario_id" pk="generation_plant_existing_and_planned_scenario_id" />
+			</fk>
+			<fk name="scenario_generation_plant_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant_scenario" >
+				<fk_column name="generation_plant_scenario_id" pk="generation_plant_scenario_id" />
+			</fk>
+			<fk name="scenario_hydro_simple_scenario_id_fkey" to_schema="switch_wecc_pyomo" to_table="hydro_simple_scenario" >
+				<fk_column name="hydro_simple_scenario_id" pk="hydro_simple_scenario_id" />
+			</fk>
+			<fk name="scenario_study_timeframe_id_fkey" to_schema="switch_wecc_pyomo" to_table="study_timeframe" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+			</fk>
+			<fk name="scenario_time_sample_id_fkey" to_schema="switch_wecc_pyomo" to_table="time_sample" >
+				<fk_column name="time_sample_id" pk="time_sample_id" />
+			</fk>
+		</table>
+		<table name="study_timeframe" >
+			<comment><![CDATA[Defines a time frame for one or more studies which includes a set of periods and timeseries within each period. 
+  If you wish to change the length or number of investment periods, you will need to define a new row in this table.]]></comment>
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="name" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="study_timeframe_pkey" unique="PRIMARY_KEY" >
+				<column name="study_timeframe_id" />
+			</index>
+		</table>
+		<table name="time_sample" >
+			<comment><![CDATA[A representative sample drawn from all available timeseries in this study timeframe. A single study timeframe 
+  may have multiple sample drawn from it.]]></comment>
+			<column name="time_sample_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="study_timeframe_id" type="smallint" length="5" decimal="0" jt="5" />
+			<column name="name" type="varchar" length="30" decimal="0" jt="12" mandatory="y" />
+			<column name="method" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="time_sample_pkey" unique="PRIMARY_KEY" >
+				<column name="time_sample_id" />
+			</index>
+			<index name="time_sample_study_timeframe_id_time_sample_id_key" unique="UNIQUE" >
+				<column name="study_timeframe_id" />
+				<column name="time_sample_id" />
+			</index>
+			<fk name="time_sample_study_timeframe_id_fkey" to_schema="switch_wecc_pyomo" to_table="study_timeframe" >
+				<fk_column name="study_timeframe_id" pk="study_timeframe_id" />
+			</fk>
+		</table>
+		<table name="transmission_lines" >
+			<comment><![CDATA[This table contains all transmission lines defined in the simulation, regardless if the transmission line 
+  currently exists or is merely being proposed. Transmission lines must only be defined in one direction. 
+  Switch will automatically augment the model to allow for Tx in both directions. ]]></comment>
+			<column name="transmission_line_id" type="serial" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="start_load_zone_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="end_load_zone_id" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="trans_length_km" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<column name="trans_efficiency" type="float8" length="17" decimal="17" jt="6" />
+			<column name="existing_trans_cap_mw" type="float8" length="17" decimal="17" jt="6" mandatory="y" />
+			<column name="new_build_allowed" type="smallint" length="5" decimal="0" jt="5" mandatory="y" />
+			<column name="derating_factor" type="float8" length="17" decimal="17" jt="6" />
+			<column name="terrain_multiplier" type="float8" length="17" decimal="17" jt="6" />
+			<index name="transmission_lines_pkey" unique="PRIMARY_KEY" >
+				<column name="transmission_line_id" />
+			</index>
+			<fk name="transmission_lines_end_load_zone_id_fkey" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="end_load_zone_id" pk="load_zone_id" />
+			</fk>
+			<fk name="transmission_lines_start_load_zone_id_fkey" to_schema="switch_wecc_pyomo" to_table="load_zone" >
+				<fk_column name="start_load_zone_id" pk="load_zone_id" />
+			</fk>
+		</table>
+		<table name="variable_capacity_factors" >
+			<comment><![CDATA[This contains historical time series of hourly capacity factors for variable renewable generators (wind, solar, etc).
+   Multiplying these hourly capacity factors by the installed capacity will produce the hourly power output. This table 
+   should store the historical data for one or more reference years. These values will be projected to future years when 
+   a scenario is exported to SWITCH-pyomo input files.]]></comment>
+			<column name="generation_plant_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="raw_timepoint_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="timestamp_utc" type="timestamp" length="29" decimal="6" jt="93" mandatory="y" >
+				<comment><![CDATA[This timestamp should be recorded in UTC. For regions that 
+only span one time zone, this is less important. This should never contain daylight savings time because a time series 
+specified in daylight savings time will drop one hour per year.]]></comment>
+			</column>
+			<column name="capacity_factor" type="float8" length="17" decimal="17" jt="6" />
+			<index name="variable_capacity_factors_pkey" unique="PRIMARY_KEY" >
+				<column name="generation_plant_id" />
+				<column name="raw_timepoint_id" />
+			</index>
+			<fk name="variable_capacity_factors_generation_plant_id_fkey" to_schema="switch_wecc_pyomo" to_table="generation_plant" >
+				<fk_column name="generation_plant_id" pk="generation_plant_id" />
+			</fk>
+			<fk name="variable_capacity_factors_raw_timepoint_id_fkey" to_schema="switch_wecc_pyomo" to_table="raw_timepoint" >
+				<fk_column name="raw_timepoint_id" pk="raw_timepoint_id" />
+			</fk>
+			<fk name="variable_capacity_factors_raw_timepoint_id_fkey1" to_schema="switch_wecc_pyomo" to_table="raw_timepoint" >
+				<fk_column name="raw_timepoint_id" pk="raw_timepoint_id" />
+				<fk_column name="timestamp_utc" pk="timestamp_utc" />
+			</fk>
+		</table>
+		<sequence name="transmission_lines_transmission_line_id_seq" start="1" />
+	</schema>
+	<connector name="PostgreSQL" database="PostgreSQL" driver_class="org.postgresql.Driver" driver_jar="postgresql-42.0.0.jre6.jar" driver_desc="Heroku" host="switch-db2.erg.berkeley.edu" port="5432" instance="switch_wecc2" user="pehidalg" passwd="aDNsMWMwcHQzcjA=" />
+	<layout name="Default Layout" id="Layout_2fb53df6" show_relation="columns" >
+		<entity schema="switch_wecc_pyomo" name="demand_scenario" color="bfd4f5" x="960" y="1488" />
+		<entity schema="switch_wecc_pyomo" name="demand_timeseries" color="bfd4f5" x="1392" y="1328" />
+		<entity schema="switch_wecc_pyomo" name="energy_source" color="c8f5bf" x="656" y="272" />
+		<entity schema="switch_wecc_pyomo" name="fuel_simple_price" color="c8f5bf" x="656" y="48" />
+		<entity schema="switch_wecc_pyomo" name="fuel_simple_price_scenario" color="bfd4f5" x="2192" y="576" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant" color="f5ddbf" x="1248" y="576" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_cost" color="f5ddbf" x="1488" y="1088" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_cost_scenario" color="f5ddbf" x="960" y="1088" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned" color="bfbff5" x="544" y="1328" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned_scenario" color="bfbff5" x="544" y="1520" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_scenario" color="bfd4f5" x="2192" y="864" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_scenario_member" color="bfbff5" x="48" y="1520" />
+		<entity schema="switch_wecc_pyomo" name="hydro_flow_data" color="f5ddbf" x="1488" y="576" />
+		<entity schema="switch_wecc_pyomo" name="hydro_simple_scenario" color="bfd4f5" x="1808" y="864" />
+		<entity schema="switch_wecc_pyomo" name="load_zone" color="c8f5bf" x="384" y="48" />
+		<entity schema="switch_wecc_pyomo" name="period" color="bfbff5" x="336" y="1328" />
+		<entity schema="switch_wecc_pyomo" name="period_all_timeseries" color="c8f5bf" x="2016" y="1328" />
+		<entity schema="switch_wecc_pyomo" name="raw_timepoint" color="bfd4f5" x="1184" y="1328" />
+		<entity schema="switch_wecc_pyomo" name="raw_timeseries" color="bfd4f5" x="1184" y="1488" />
+		<entity schema="switch_wecc_pyomo" name="sampled_timepoint" color="d2bff5" x="704" y="576" />
+		<entity schema="switch_wecc_pyomo" name="sampled_timeseries" color="d2bff5" x="480" y="576" />
+		<entity schema="switch_wecc_pyomo" name="scenario" color="bfd4f5" x="1808" y="576" />
+		<entity schema="switch_wecc_pyomo" name="study_timeframe" color="c8f5bf" x="1808" y="1328" />
+		<entity schema="switch_wecc_pyomo" name="time_sample" color="d2bff5" x="704" y="848" />
+		<entity schema="switch_wecc_pyomo" name="transmission_lines" color="c8f5bf" x="384" y="272" />
+		<entity schema="switch_wecc_pyomo" name="variable_capacity_factors" color="c8f5bf" x="2016" y="1488" />
+	</layout>
+	<layout name="Sample Layout with Groups" id="Layout_a700459" show_relation="columns" >
+		<entity schema="switch_wecc_pyomo" name="demand_scenario" color="bfd4f5" x="960" y="1520" />
+		<entity schema="switch_wecc_pyomo" name="demand_timeseries" color="bfd4f5" x="1392" y="1360" />
+		<entity schema="switch_wecc_pyomo" name="energy_source" color="c8f5bf" x="656" y="304" />
+		<entity schema="switch_wecc_pyomo" name="fuel_simple_price" color="c8f5bf" x="656" y="80" />
+		<entity schema="switch_wecc_pyomo" name="fuel_simple_price_scenario" color="bfd4f5" x="2192" y="608" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant" color="f5ddbf" x="1248" y="608" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_cost" color="f5ddbf" x="1488" y="1120" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_cost_scenario" color="f5ddbf" x="960" y="1120" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned" color="bfbff5" x="544" y="1360" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned_scenario" color="bfbff5" x="544" y="1552" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_scenario" color="bfd4f5" x="2192" y="896" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_scenario_member" color="bfbff5" x="48" y="1552" />
+		<entity schema="switch_wecc_pyomo" name="hydro_flow_data" color="f5ddbf" x="1488" y="608" />
+		<entity schema="switch_wecc_pyomo" name="hydro_simple_scenario" color="bfd4f5" x="1808" y="896" />
+		<entity schema="switch_wecc_pyomo" name="load_zone" color="c8f5bf" x="384" y="80" />
+		<entity schema="switch_wecc_pyomo" name="period" color="bfbff5" x="336" y="1360" />
+		<entity schema="switch_wecc_pyomo" name="period_all_timeseries" color="c8f5bf" x="2016" y="1360" />
+		<entity schema="switch_wecc_pyomo" name="raw_timepoint" color="bfd4f5" x="1184" y="1360" />
+		<entity schema="switch_wecc_pyomo" name="raw_timeseries" color="bfd4f5" x="1184" y="1520" />
+		<entity schema="switch_wecc_pyomo" name="sampled_timepoint" color="d2bff5" x="704" y="608" />
+		<entity schema="switch_wecc_pyomo" name="sampled_timeseries" color="d2bff5" x="480" y="608" />
+		<entity schema="switch_wecc_pyomo" name="scenario" color="bfd4f5" x="1808" y="608" />
+		<entity schema="switch_wecc_pyomo" name="study_timeframe" color="c8f5bf" x="1808" y="1360" />
+		<entity schema="switch_wecc_pyomo" name="time_sample" color="d2bff5" x="704" y="880" />
+		<entity schema="switch_wecc_pyomo" name="transmission_lines" color="c8f5bf" x="384" y="304" />
+		<entity schema="switch_wecc_pyomo" name="variable_capacity_factors" color="c8f5bf" x="2016" y="1520" />
+		<callout x="1808" y="480" pointer="NO" >
+			<comment><![CDATA[You may create multiple layouts with the same or different tables.
+Layouts will be saved to project file. 
+Double-click any column, foreign key or table headers to edit.]]></comment>
+		</callout>
+		<group name="generation_plant" color="f7f3ec" >
+			<entity schema="switch_wecc_pyomo" name="generation_plant" />
+			<entity schema="switch_wecc_pyomo" name="hydro_flow_data" />
+			<entity schema="switch_wecc_pyomo" name="generation_plant_cost" />
+			<entity schema="switch_wecc_pyomo" name="generation_plant_cost_scenario" />
+		</group>
+		<group name="scenario" color="ecf0f7" >
+			<entity schema="switch_wecc_pyomo" name="scenario" />
+			<entity schema="switch_wecc_pyomo" name="fuel_simple_price_scenario" />
+			<entity schema="switch_wecc_pyomo" name="generation_plant_scenario" />
+			<entity schema="switch_wecc_pyomo" name="hydro_simple_scenario" />
+		</group>
+		<group name="study_timeframe" color="eef7ec" >
+			<entity schema="switch_wecc_pyomo" name="study_timeframe" />
+			<entity schema="switch_wecc_pyomo" name="period_all_timeseries" />
+			<entity schema="switch_wecc_pyomo" name="variable_capacity_factors" />
+		</group>
+		<group name="period" color="ececf7" >
+			<entity schema="switch_wecc_pyomo" name="period" />
+			<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned" />
+			<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned_scenario" />
+			<entity schema="switch_wecc_pyomo" name="generation_plant_scenario_member" />
+		</group>
+		<group name="raw_timepoint" color="ecf0f7" >
+			<entity schema="switch_wecc_pyomo" name="raw_timepoint" />
+			<entity schema="switch_wecc_pyomo" name="demand_timeseries" />
+			<entity schema="switch_wecc_pyomo" name="demand_scenario" />
+			<entity schema="switch_wecc_pyomo" name="raw_timeseries" />
+		</group>
+		<group name="sampled_timeseries" color="f0ecf7" >
+			<entity schema="switch_wecc_pyomo" name="sampled_timeseries" />
+			<entity schema="switch_wecc_pyomo" name="sampled_timepoint" />
+			<entity schema="switch_wecc_pyomo" name="time_sample" />
+		</group>
+		<group name="load_zone" color="eef7ec" >
+			<entity schema="switch_wecc_pyomo" name="load_zone" />
+			<entity schema="switch_wecc_pyomo" name="fuel_simple_price" />
+			<entity schema="switch_wecc_pyomo" name="energy_source" />
+			<entity schema="switch_wecc_pyomo" name="transmission_lines" />
+		</group>
+	</layout>
+	<layout name="Sample Layout with Relational Data Browse" id="Layout_2f65cde2" show_relation="columns" >
+		<entity schema="switch_wecc_pyomo" name="load_zone" color="c8f5bf" x="272" y="96" />
+		<entity schema="switch_wecc_pyomo" name="transmission_lines" color="c8f5bf" x="272" y="320" />
+		<entity schema="switch_wecc_pyomo" name="raw_timeseries" color="bfd4f5" x="880" y="48" />
+		<entity schema="switch_wecc_pyomo" name="raw_timepoint" color="bfd4f5" x="896" y="224" />
+		<entity schema="switch_wecc_pyomo" name="energy_source" color="c8f5bf" x="560" y="160" />
+		<entity schema="switch_wecc_pyomo" name="study_timeframe" color="c8f5bf" x="1200" y="48" />
+		<entity schema="switch_wecc_pyomo" name="period" color="bfbff5" x="1344" y="144" />
+		<entity schema="switch_wecc_pyomo" name="period_all_timeseries" color="c8f5bf" x="1408" y="272" />
+		<entity schema="switch_wecc_pyomo" name="time_sample" color="d2bff5" x="1600" y="64" />
+		<entity schema="switch_wecc_pyomo" name="sampled_timeseries" color="d2bff5" x="1696" y="192" />
+		<entity schema="switch_wecc_pyomo" name="sampled_timepoint" color="d2bff5" x="1744" y="400" />
+		<entity schema="switch_wecc_pyomo" name="demand_scenario" color="bfd4f5" x="48" y="624" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_cost_scenario" color="f5ddbf" x="736" y="624" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_cost" color="f5ddbf" x="784" y="736" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned_scenario" color="bfbff5" x="736" y="912" />
+		<entity schema="switch_wecc_pyomo" name="hydro_simple_scenario" color="bfd4f5" x="736" y="1184" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant" color="f5ddbf" x="512" y="576" />
+		<entity schema="switch_wecc_pyomo" name="variable_capacity_factors" color="c8f5bf" x="704" y="1440" />
+		<entity schema="switch_wecc_pyomo" name="hydro_flow_data" color="f5ddbf" x="800" y="1296" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_existing_and_planned" color="bfbff5" x="784" y="1024" />
+		<entity schema="switch_wecc_pyomo" name="fuel_simple_price_scenario" color="bfd4f5" x="1200" y="560" />
+		<entity schema="switch_wecc_pyomo" name="fuel_simple_price" color="c8f5bf" x="1296" y="672" />
+		<entity schema="switch_wecc_pyomo" name="demand_timeseries" color="bfd4f5" x="64" y="736" />
+		<entity schema="switch_wecc_pyomo" name="scenario" color="bfd4f5" x="1328" y="1696" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_scenario" color="bfd4f5" x="656" y="1632" />
+		<entity schema="switch_wecc_pyomo" name="generation_plant_scenario_member" color="bfbff5" x="688" y="1744" />
+		<browser id="Browse_2d77104" name="Sample Relational Data Browse" confirm_updates="y" >
+			<browse_table schema="switch_wecc_pyomo" entity="scenario" x="10" y="10" width="400" height="300" >
+				<browse_table schema="switch_wecc_pyomo" entity="demand_scenario" fk="scenario_demand_scenario_id_fkey" x="420" y="10" width="400" height="300" record_view="y" >
+					<browse_table schema="switch_wecc_pyomo" entity="demand_timeseries" fk="demand_timeseries_demand_scenario_id_fkey" x="830" y="10" width="400" height="300" />
+				</browse_table>
+			</browse_table>
+		</browser>
+	</layout>
+</project>
