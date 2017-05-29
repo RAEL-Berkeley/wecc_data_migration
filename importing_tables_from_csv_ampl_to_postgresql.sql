@@ -294,7 +294,7 @@ DELIMITER ',' CSV HEADER;
 
 -- Populating generation_plant table:
 
--- Is it ok if I leave technology with _EP for the exiting ones? ok
+-- Is it ok if I leave technology with _EP for the exiting ones? I decided to delete _EP so it's easier to put data etc.
 -- capacity_limit column in generation_plant table, for now it's blank for exiting plants. ok
 -- t.heat_rate as full_load_heat_rate. ok
 -- hydro_efficiency is blank for now. This is used for benjamin's extension/hydro module 
@@ -323,7 +323,9 @@ t2.storage_efficiency as storage_efficiency, t2.minimum_loading as min_load_frac
 t2.startup_mmbtu_per_mw as startup_fuel, t2.startup_cost_dollars_per_mw as startup_om
 from ampl_existing_plants_v3 as t join load_zone as t1 on(name = load_area) 
 				   join ampl_gen_info_scenario_v3 as t2 using(technology);
-				   
+
+-- Editing so _EP is deleted from gen_tech names.
+update generation_plant set gen_tech = trim(trailing '_EP' from gen_tech);
 				   
 -- Inserting proposed generators
 -- I filtered by year 2010 so each project wouldn't be repeated 41 times because the table ampl_generator_costs_tab
@@ -386,14 +388,14 @@ DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
 
 
--- this query gives 303892 rows (303892 rows / 7412 proposed projects = 41 years of costs per project.)
--- [Pending][Ask Josiah][run query below] Should I just edit the name of the existing technologies, so they appear easily in this table?
--- ans: edit _EP
--- insert into generation_plant_cost
--- select 1 as generation_plant_cost_scenario_id, generation_plant_id, year as build_year, fixed_o_m, overnight_cost
--- from ampl_generator_costs_yearly_v3 
--- join generation_plant t on (gen_tech=technology)
--- where gen_costs_scenario_id = 10;
+-- this query gives 338701 rows (303892 rows / 9332 projects = 36 years of costs per project.)
+-- we might have to check this because the number of years was 36 instead of 41. Some "existing" 
+-- projects might have not gotten costs if their technology name (without _EP) did not exist in ampl_generator_costs_yearly_v3
+insert into generation_plant_cost
+select 1 as generation_plant_cost_scenario_id, generation_plant_id, year as build_year, fixed_o_m, overnight_cost
+from ampl_generator_costs_yearly_v3 
+join generation_plant t on (gen_tech=technology)
+where gen_costs_scenario_id = 10;
 
 
 ---------------------------------------------------------------------------
@@ -596,6 +598,7 @@ order by 2,3;
 -- [Pending] Fuel prices
 ---------------------------------------------------------------------------
 
+-- not used --------------------------------------------------------------
 create table if not exists ampl_fuel_prices_v3( 
 fuel_scenario_id int,
 area_id int,
@@ -610,6 +613,25 @@ primary key(fuel_scenario_id, load_area, fuel, year)
 
 COPY ampl_fuel_prices_v3 
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_fuel_prices_v3.csv'  
+DELIMITER ',' NULL AS 'NULL' CSV HEADER;
+
+create table if not exists ampl_fuel_prices_v4( 
+fuel_scenario_id int,
+area_id int,
+load_area varchar,
+fuel VARCHAR,
+year int,
+fuel_price double PRECISION,
+notes VARCHAR(300),
+eai_region VARCHAR,
+primary key(fuel_scenario_id, load_area, fuel, year)
+);
+-- end not used --------------------------------------------------------------
+
+
+-- _v4 includes Gas prices from EIA 2017. This is the table used in this version of switch.
+COPY ampl_fuel_prices_v4 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_fuel_prices_v4.csv'  
 DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
 -- Table with fuel prices for all years. The idea is to join this table with the table with periods, 
@@ -630,22 +652,22 @@ primary key(fuel_simple_scenario_id, load_zone_id, fuel, projection_year)
 insert into fuel_simple_price_yearly
 select 1 as fuel_simple_scenario_id, area_id as load_zone_id, load_area as load_zone_name, fuel, 
 year as projection_year, fuel_price, notes, eai_region
-from ampl_fuel_prices_v3;
+from ampl_fuel_prices_v4;
 
 update fuel_simple_price_yearly set fuel = 'Electricity' where fuel = 'Storage';
 
 
--- [Pending][Ask Josiah] insert into fuel_simple_price by joining with table with period_id
--- insert into fuel_simple_price
---
+-- fuel_simple_price table skipped here. This table is created in get_switch_input_tables 
+-- by joining fuel_simple_price_yearly with table with period_id
 
--- [Pending][To-do] Include NaturalGas prices from tables in MySQL (EIA 2017)
+
+
 -- [Pending][To-do][Ask Josiah] Decide what to do with biomass prices. Maybe use supply MySQL/AMPL curves?
 -- ans: use supply curve
 
 insert into fuel_simple_price_scenario
 select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
-'Fuel prices from SWITCH AMPL. Note Gas and Biomass. EIA energy outlook 2017 for Coal(_CCS), DistillateFuelOil(_CCS), ResidualFuelOil(_CCS), and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
+'Fuel prices from SWITCH AMPL. Not Biomass. EIA energy outlook 2017 for Gas(_CCS), Coal(_CCS), DistillateFuelOil(_CCS), ResidualFuelOil(_CCS), and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
 
 
 ---------------------------------------------------------------------------

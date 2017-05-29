@@ -10,6 +10,11 @@ INSERT INTO period(
     VALUES (1, 1, 2020, 2020, 5),
            (1, 2, 2025, 2025, 5),
     ;
+-- Paty's addition for simplicity of other queries
+alter table period add column end_year INT;
+update period set end_year = 2024 where start_year = 2020;
+update period set end_year = 2029 where start_year = 2025;
+
 
 INSERT INTO period_all_timeseries(
     study_timeframe_id, period_id, raw_timeseries_id)
