@@ -1,0 +1,31 @@
+
+
+-- future period costs table (existing and proposed generators)
+select t.name, w.period, avg(gen_overnight_cost) as gen_overnight_cost, avg(gen_fixed_o_m) as gen_fixed_o_m
+from (select generation_plant_id, build_year, overnight_cost as gen_overnight_cost, fixed_o_m as gen_fixed_o_m,
+						(case when 
+						build_year >= period.start_year 
+						and build_year <= period.start_year + length_yrs -1 then label else 0 end) as period
+	from switch.generation_plant_cost
+	join switch.period on(build_year>=start_year)
+	where study_timeframe_id = 1 and generation_plant_cost_scenario_id = 1) as w
+join generation_plant as t using(generation_plant_id) 
+where period!=0
+group by t.name, generation_plant_id, period
+order by 1,2;
+
+
+# still working on this:
+--select generation_plant_id, t2.build_year, overnight_cost, fixed_o_m
+--from generation_plant_cost t3
+--join generation_plant as t using(generation_plant_id)
+--join generation_plant_existing_and_planned as t2 using(generation_plant_id)
+--where t3.build_year <= (select min(start_year) from switch.period where study_timeframe_id = 1)
+--and generation_plant_id=1157630678;
+
+select generation_plant_id, t2.build_year, overnight_cost, fixed_o_m
+from generation_plant_cost t3
+join generation_plant_existing_and_planned as t2 using(generation_plant_id)
+where t3.build_year = t2.build_year 
+or t3.build_year = (select min(build_year) from generation_plant_cost where generation_plant_id = t3.generation_plant_id)
+and generation_plant_id=1157630678;
