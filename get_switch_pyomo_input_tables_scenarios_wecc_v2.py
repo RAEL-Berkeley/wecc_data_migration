@@ -136,47 +136,35 @@ with open('scenario_params.txt', 'w') as f:
     f.write('\nScenario notes: %s' % description)
 
 ########################################################
-# Paty: this section still needs to be worked on
 # TIMESCALES
 
 print '  periods.tab...'
-# cur.execute(('SELECT DISTINCT p.period_name, period_start, period_end '
-#              'FROM switch.timescales_sample_timeseries sts '
-#              'JOIN switch.timescales_population_timeseries pts ON sts.sampled_from_population_timeseries_id=pts.population_ts_id '
-#              'JOIN switch.timescales_periods p USING (period_id) '
-#              'WHERE sample_ts_scenario_id={} '
-#              'ORDER BY 1;'
-#             ).format(sample_ts_scenario_id))
-cur.execute("""SELECT DISTINCT p.period_name, period_start, period_end 
-               FROM switch.timescales_sample_timeseries sts 
-                   JOIN switch.timescales_population_timeseries pts ON sts.sampled_from_population_timeseries_id=pts.population_ts_id 
-                   JOIN switch.timescales_periods p USING (period_id) 
-               WHERE sample_ts_scenario_id={id} 
-               ORDER BY 1;
-            """.format(id=sample_ts_scenario_id))
-
+ cur.execute(("""select label, start_year as period_start, end_year as period_end
+				from period where study_timeframe_id={id}
+				oder by 1;
+				""").format(id=study_timeframe_id))			
 write_tab('periods', ['INVESTMENT_PERIOD', 'period_start', 'period_end'], cur)
 
 print '  timeseries.tab...'
-cur.execute("""SELECT sample_ts_id, period_name, hours_per_tp::integer, sts.num_timepoints, sts.scaling_to_period 
-				FROM switch.timescales_sample_timeseries sts 
-				JOIN switch.timescales_population_timeseries pts 
-				ON sts.sampled_from_population_timeseries_id=pts.population_ts_id AND sample_ts_scenario_id=%s 
-				ORDER BY 1;
-				""" % (sample_ts_scenario_id))
+cur.execute("""select name, t.label as ts_period, hours_per_tp as ts_duration_of_tp, num_timepoints as ts_num_tps, scaling_to_period as ts_scale_to_period
+				from switch.sampled_timeseries as t2
+				join period as t using(period_id)
+				where t2.study_timeframe_id={id}
+				order by label;
+				""").format(id=study_timeframe_id))
 write_tab('timeseries', ['TIMESERIES', 'ts_period', 'ts_duration_of_tp', 'ts_num_tps', 'ts_scale_to_period'], cur)
 
 print '  timepoints.tab...'
-cur.execute("""SELECT sample_tp_id,to_char(timestamp, 'YYYYMMDDHH24'),sample_ts_id 
-				FROM switch.timescales_sample_timepoints 
-				JOIN switch.timescales_sample_timeseries USING (sample_ts_id) 
-				WHERE sample_ts_scenario_id=%s 
-				ORDER BY 1;
-				""" % (sample_ts_scenario_id))
+cur.execute("""select raw_timepoint_id as timepoint_id, to_char(timestamp_utc, 'YYYYMMDDHH24') as timestamp, name
+				from sampled_timepoint as t
+				join sampled_timeseries using(sampled_timeseries_id)
+				where t.study_timeframe_id={id}
+				order by 1;
+				""").format(id=study_timeframe_id))
 write_tab('timepoints', ['timepoint_id','timestamp','timeseries'], cur)
 
 ########################################################
-# LOAD ZONES
+# LOAD ZONES [Pending loads.tab]
 
 #done
 print '  load_zones.tab...'
@@ -203,7 +191,7 @@ cur.execute("""SELECT lzd.name, tps.sample_tp_id, CASE WHEN lz_demand_mwh >= 0 T
 write_tab('loads',['LOAD_ZONE','TIMEPOINT','zone_demand_mw'],cur)
 
 ########################################################
-# BALANCING AREAS 
+# BALANCING AREAS [Pending zone_coincident_peak_demand.tab]
 
 print '  balancing_areas.tab...'
 cur.execute("""SELECT balancing_area, quickstart_res_load_frac, quickstart_res_wind_frac, quickstart_res_solar_frac,spinning_res_load_frac, 
@@ -296,14 +284,13 @@ cur.execute("""select load_zone_name as load_zone, fuel, period, AVG(fuel_price)
 write_tab('fuel_cost',['load_zone','fuel','period','fuel_cost'],cur)
 
 ########################################################
-# GENERATORS 
+# GENERATORS [gen_build_costs.tab is pending]
 
-#    Optional missing columns:
+#    Optional missing columns in generation_projects_info.tab:
 #        gen_unit_size, 
 #		 gen_ccs_energy_load,
 #        gen_ccs_capture_efficiency, 
 #        gen_is_distributed
-
 print '  generation_projects_info.tab...'
 cur.execute("""select t.name, gen_tech, energy_source as gen_energy_source, t2.name as gen_load_zone, 
 				max_age as gen_max_age, is_variable as gen_is_variable, is_baseload as gen_is_baseload,
@@ -327,7 +314,8 @@ cur.execue("""select t.name, build_year, capacity as gen_predetermined_cap
 			""" % (generation_plant_existing_and_planned_scenario_id))
 write_tab('gen_build_predetermined',['GENERATION_PROJECT','build_year','gen_predetermined_cap],cur)
 
-# continue here
+# [Ask Josiah][Pending]continue here
+# This table has costs for the year when the generator was built and future costs for each future period simulated.
 # Yearly overnight and fixed o&m cost projections are averaged for each study period.
 print '  gen_build_costs.tab...'
 cur.execute("""SELECT technology_name, period_name, AVG(overnight_cost), AVG(fixed_o_m) 
@@ -342,27 +330,6 @@ cur.execute("""SELECT technology_name, period_name, AVG(overnight_cost), AVG(fix
 								JOIN switch.timescales_periods p USING (period_id) WHERE sample_ts_scenario_id=%s)  
 			GROUP BY 1,2 ORDER BY 1,2;""" % (gen_costs_id,gen_info_id,sample_ts_scenario_id)) 
 write_tab('gen_build_costs',['generation_technology','investment_period','g_overnight_cost','g_fixed_o_m'],cur)
-
-########################################################
-# PROJECTS
-
-
-excluded_projs = ('chapiquina','chiburgo')
-# Chapiquina doesn't have capacity factors defined.
-# Chiburgo is a regulation reservoir which won't be modeled.
-
-print '  project_info.tab...'
-cur.execute("SELECT project_name, gen_tech, load_zone, connect_cost_per_mw, variable_o_m, full_load_heat_rate, forced_outage_rate, scheduled_outage_rate, project_id, capacity_limit_mw, hydro_efficiency FROM switch.project_info_existing WHERE project_name NOT IN %s AND existing_projects_id = %s \
-    UNION SELECT project_name, gen_tech, load_zone, connect_cost_per_mw, variable_o_m, full_load_heat_rate, forced_outage_rate, scheduled_outage_rate, project_id, capacity_limit_mw, hydro_efficiency FROM switch.project_info_new JOIN switch.new_projects_sets USING (project_id) WHERE new_projects_sets_id = %s ORDER BY 2,3;" % (excluded_projs, existing_projects_id, new_projects_id))
-write_tab('project_info',['PROJECT','proj_gen_tech','proj_load_zone','proj_connect_cost_per_mw','proj_variable_om','tproj_full_load_heat_rate','proj_forced_outage_rate','proj_scheduled_outage_rate','proj_dbid','proj_capacity_limit_mw','proj_hydro_efficiency'],cur)
-
-print '  proj_existing_builds.tab...'
-cur.execute("SELECT project_name, start_year, capacity_mw FROM switch.project_info_existing WHERE project_name NOT IN %s AND existing_projects_id = %s ;" % (excluded_projs,existing_projects_id))
-write_tab('proj_existing_builds',['PROJECT','build_year','proj_existing_cap'],cur)
-
-print '  proj_build_costs.tab...'
-cur.execute("SELECT project_name, start_year, overnight_cost, fixed_o_m FROM switch.project_info_existing WHERE project_name NOT IN %s AND existing_projects_id = %s ;" % (excluded_projs,existing_projects_id))
-write_tab('proj_build_costs',['PROJECT','build_year','proj_overnight_cost','proj_fixed_om'],cur)
 
 ########################################################
 # FINANCIALS
