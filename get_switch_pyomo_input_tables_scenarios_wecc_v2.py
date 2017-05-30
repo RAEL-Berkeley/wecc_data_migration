@@ -329,9 +329,19 @@ write_tab('gen_build_predetermined',['GENERATION_PROJECT','build_year','gen_pred
 
 # continue here
 # Yearly overnight and fixed o&m cost projections are averaged for each study period.
-print '  gen_new_build_costs.tab...'
-cur.execute("SELECT technology_name, period_name, AVG(overnight_cost), AVG(fixed_o_m) FROM switch.generator_yearly_costs JOIN switch.generator_info USING (technology_name) CROSS JOIN switch.timescales_periods WHERE generator_yearly_costs_id = %s AND generator_info_id = %s AND projection_year BETWEEN period_start AND period_end AND period_name IN (SELECT DISTINCT p.period_name FROM switch.timescales_sample_timeseries sts JOIN switch.timescales_population_timeseries pts ON sts.sampled_from_population_timeseries_id=pts.population_ts_id JOIN switch.timescales_periods p USING (period_id) WHERE sample_ts_scenario_id=%s)  GROUP BY 1,2 ORDER BY 1,2;" % (gen_costs_id,gen_info_id,sample_ts_scenario_id)) 
-write_tab('gen_new_build_costs',['generation_technology','investment_period','g_overnight_cost','g_fixed_o_m'],cur)
+print '  gen_build_costs.tab...'
+cur.execute("""SELECT technology_name, period_name, AVG(overnight_cost), AVG(fixed_o_m) 
+			FROM switch.generator_yearly_costs 
+			JOIN switch.generator_info USING (technology_name) 
+			CROSS JOIN switch.timescales_periods 
+			WHERE generator_yearly_costs_id = %s AND generator_info_id = %s 
+			AND projection_year BETWEEN period_start AND period_end 
+			AND period_name IN (SELECT DISTINCT p.period_name 
+								FROM switch.timescales_sample_timeseries sts 
+								JOIN switch.timescales_population_timeseries pts ON sts.sampled_from_population_timeseries_id=pts.population_ts_id 
+								JOIN switch.timescales_periods p USING (period_id) WHERE sample_ts_scenario_id=%s)  
+			GROUP BY 1,2 ORDER BY 1,2;""" % (gen_costs_id,gen_info_id,sample_ts_scenario_id)) 
+write_tab('gen_build_costs',['generation_technology','investment_period','g_overnight_cost','g_fixed_o_m'],cur)
 
 ########################################################
 # PROJECTS
