@@ -164,7 +164,7 @@ cur.execute("""select raw_timepoint_id as timepoint_id, to_char(timestamp_utc, '
 write_tab('timepoints', ['timepoint_id','timestamp','timeseries'], cur)
 
 ########################################################
-# LOAD ZONES [Pending loads.tab]
+# LOAD ZONES
 
 #done
 print '  load_zones.tab...'
@@ -174,20 +174,15 @@ cur.execute("""SELECT name, ccs_distance_km as zone_ccs_distance_km, load_zone_i
 				""" )
 write_tab('load_zones',['LOAD_ZONE','zone_ccs_distance_km','zone_dbid'],cur)
 
-#Paty: work on
 print '  loads.tab...'
-cur.execute("""SELECT lzd.name, tps.sample_tp_id, CASE WHEN lz_demand_mwh >= 0 THEN lz_demand_mwh*(SELECT mul(1+growth_factor/100) 
-				from switch.demand_growth dg 
-				where dg.name =lzd.name and TO_CHAR(tps.timestamp,'YYYY')::INT >= year 
-				and demand_growth_scenario_id = %s) ELSE 0 END 
-    			FROM switch.lz_hourly_demand lzd 
-    			JOIN switch.timescales_sample_timepoints tps ON TO_CHAR(tps.timestamp,'MMDDHH24')=TO_CHAR(lzd.timestamp_cst,'MMDDHH24') 
-    			JOIN switch.timescales_sample_timeseries USING (sample_ts_id) 
-    			JOIN switch.load_zone USING (name,load_zones_scenario_id) 
-    			WHERE sample_ts_scenario_id = %s AND load_zones_scenario_id = %s 
-    			AND lz_hourly_demand_id = %s 
-    			ORDER BY 1,2;
-    			""" % (demand_growth_id,sample_ts_scenario_id,load_zones_scenario_id,lz_hourly_demand_id))
+cur.execute("""select load_zone_name, t.raw_timepoint_id as timepoint, demand_mw as zone_demand_mw
+				from sampled_timepoint as t
+				join sampled_timeseries using(sampled_timeseries_id)
+				join demand_timeseries as d using(raw_timepoint_id)
+				where t.study_timeframe_id={id}
+				and demand_scenario_id={id2}
+				order by 1,2;
+    			""").format(id=study_timeframe_id, id2=demand_scenario_id))
 write_tab('loads',['LOAD_ZONE','TIMEPOINT','zone_demand_mw'],cur)
 
 ########################################################
