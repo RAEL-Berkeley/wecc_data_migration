@@ -15,6 +15,17 @@ group by t.name, generation_plant_id, period
 order by 1,2;
 
 
+-- future period costs table (existing and proposed generators)
+select generation_plant_id, label, avg(overnight_cost) as gen_overnight_cost, avg(fixed_o_m) as gen_fixed_o_m
+from generation_plant_cost 
+	JOIN generation_plant using(generation_plant_id) 
+	JOIN period on(build_year>=start_year and build_year<=end_year)
+where period.study_timeframe_id = 1 
+  and generation_plant_cost.generation_plant_cost_scenario_id = 1
+group by 1,2
+order by 1,2;
+ 
+
 # still working on this:
 --select generation_plant_id, t2.build_year, overnight_cost, fixed_o_m
 --from generation_plant_cost t3
