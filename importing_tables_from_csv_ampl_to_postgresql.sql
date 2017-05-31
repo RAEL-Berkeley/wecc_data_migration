@@ -273,6 +273,11 @@ COPY ampl_existing_plants_v3
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_existing_plants_v3.csv'  
 DELIMITER ',' CSV HEADER;
 
+CREATE TABLE generation_plant_vintage_cost ( like ampl_existing_plants_v3 );
+
+insert into generation_plant_vintage_cost
+select * from ampl_existing_plants_v3;
+
 -- Note: all in US$2016 (as the rest of the tables from AMPL)
 create table if not exists ampl_proposed_projects_tab( 
 project_id INT, 

@@ -279,7 +279,7 @@ cur.execute("""select load_zone_name as load_zone, fuel, period, AVG(fuel_price)
 write_tab('fuel_cost',['load_zone','fuel','period','fuel_cost'],cur)
 
 ########################################################
-# GENERATORS [gen_build_costs.tab is pending]
+# GENERATORS
 
 #    Optional missing columns in generation_projects_info.tab:
 #        gen_unit_size, 
@@ -287,7 +287,7 @@ write_tab('fuel_cost',['load_zone','fuel','period','fuel_cost'],cur)
 #        gen_ccs_capture_efficiency, 
 #        gen_is_distributed
 print '  generation_projects_info.tab...'
-cur.execute("""select t.name, gen_tech, energy_source as gen_energy_source, t2.name as gen_load_zone, 
+cur.execute("""select generation_plant_id, gen_tech, energy_source as gen_energy_source, t2.name as gen_load_zone, 
 				max_age as gen_max_age, is_variable as gen_is_variable, is_baseload as gen_is_baseload,
 				full_load_heat_rate as gen_full_load_heat_rate, variable_o_m as gen_variable_o_m,
 				connect_cost_per_mw as gen_connect_cost_per_mw,
@@ -301,7 +301,7 @@ cur.execute("""select t.name, gen_tech, energy_source as gen_energy_source, t2.n
 write_tab('generation_projects_info',['GENERATION_PROJECT','gen_tech','gen_energy_source','gen_load_zone','gen_max_age','gen_is_variable','gen_is_baseload','gen_full_load_heat_rate','gen_variable_o_m','gen_connect_cost_per_mw','gen_dbid','gen_scheduled_outage_rate','gen_forced_outage_rate','gen_capacity_limit_mw', 'gen_min_build_capacity', 'gen_is_cogen'],cur)
 
 print '	gen_build_predetermined.tab...'
-cur.execue("""select t.name, build_year, capacity as gen_predetermined_cap  
+cur.execue("""select generation_plant_id, build_year, capacity as gen_predetermined_cap  
 				from generation_plant_existing_and_planned 
 				join generation_plant as t using(generation_plant_id)  
 				where generation_plant_existing_and_planned_scenario_id=%s
@@ -309,22 +309,20 @@ cur.execue("""select t.name, build_year, capacity as gen_predetermined_cap
 			""" % (generation_plant_existing_and_planned_scenario_id))
 write_tab('gen_build_predetermined',['GENERATION_PROJECT','build_year','gen_predetermined_cap],cur)
 
-# [Ask Josiah][Pending]continue here
-# This table has costs for the year when the generator was built and future costs for each future period simulated.
-# Yearly overnight and fixed o&m cost projections are averaged for each study period.
 print '  gen_build_costs.tab...'
-cur.execute("""SELECT technology_name, period_name, AVG(overnight_cost), AVG(fixed_o_m) 
-			FROM switch.generator_yearly_costs 
-			JOIN switch.generator_info USING (technology_name) 
-			CROSS JOIN switch.timescales_periods 
-			WHERE generator_yearly_costs_id = %s AND generator_info_id = %s 
-			AND projection_year BETWEEN period_start AND period_end 
-			AND period_name IN (SELECT DISTINCT p.period_name 
-								FROM switch.timescales_sample_timeseries sts 
-								JOIN switch.timescales_population_timeseries pts ON sts.sampled_from_population_timeseries_id=pts.population_ts_id 
-								JOIN switch.timescales_periods p USING (period_id) WHERE sample_ts_scenario_id=%s)  
-			GROUP BY 1,2 ORDER BY 1,2;""" % (gen_costs_id,gen_info_id,sample_ts_scenario_id)) 
-write_tab('gen_build_costs',['generation_technology','investment_period','g_overnight_cost','g_fixed_o_m'],cur)
+cur.execute("""select project_id as generation_plant_id, start_year as label,  overnight_cost as gen_overnight_cost, fixed_o_m as gen_fixed_o_m
+				from generation_plant_vintage_cost
+				union
+				select generation_plant_id, label, avg(overnight_cost) as gen_overnight_cost, avg(fixed_o_m) as gen_fixed_o_m
+				from generation_plant_cost 
+				JOIN generation_plant using(generation_plant_id) 
+				JOIN period on(build_year>=start_year and build_year<=end_year)
+				where period.study_timeframe_id={id1} 
+  				and generation_plant_cost.generation_plant_cost_scenario_id={id2}
+				group by 1,2
+				order by 1,2;
+				""").format(id1=study_timeframe_id, id2=generation_plant_cost_scenario_id)) 
+write_tab('gen_build_costs',['GENERATION_PROJECT','build_year','gen_overnight_cost','gen_fixed_om'],cur)
 
 ########################################################
 # FINANCIALS
