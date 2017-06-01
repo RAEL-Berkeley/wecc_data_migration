@@ -338,41 +338,36 @@ with open('financials.dat','w') as f:
 
 #Pyomo will raise an error if a capacity factor is defined for a project on a timepoint when it is no longer operational (i.e. Canela 1 was built on 2007 and has a 30 year max age, so for tp's ocurring later than 2037, its capacity factor must not be written in the table).
 
-# This will only get exactly the cf in the moment when the timepoint beings
-# If a timepoint lasts for 2 hours, then the cf for the first hour will be
-# stored.    
-
-#The order is:
-# 1: Fill new solar and wind with makeshift values by gentech
-# 2: Fill existing solar and wind with makeshift values by gentech
-
-# print '  variable_capacity_factors.tab...'
-# cur.execute("SELECT info.project_name, sample_tp_id, capacity_factor FROM switch.variable_capacity_factors_existing cf JOIN switch.project_info_new info ON (info.gen_tech=cf.project_name) JOIN switch.new_projects_sets np ON (np.project_id = info.project_id and new_projects_sets_id=%s) JOIN (SELECT * FROM switch.timescales_sample_timepoints JOIN switch.timescales_sample_timeseries USING (sample_ts_id) WHERE sample_ts_scenario_id=%s) tps ON TO_CHAR(cf.timestamp_cst,'MMDDHH24')=TO_CHAR(tps.timestamp,'MMDDHH24') \
-#     UNION SELECT info.project_name, sample_tp_id, capacity_factor FROM switch.variable_capacity_factors_existing cf JOIN switch.project_info_existing info ON info.gen_tech = cf.project_name JOIN (SELECT * FROM switch.timescales_sample_timepoints JOIN switch.timescales_sample_timeseries USING (sample_ts_id) WHERE sample_ts_scenario_id=%s) tps ON TO_CHAR(cf.timestamp_cst,'MMDDHH24')=TO_CHAR(tps.timestamp,'MMDDHH24') AND existing_projects_id = %s \
-#     ORDER BY 1,2;" % (new_projects_id,sample_ts_scenario_id,sample_ts_scenario_id, existing_projects_id))
-# write_tab('variable_capacity_factors',['PROJECT','timepoint','proj_max_capacity_factor'],cur)
-
-
-#The order is:
-# 1: Fill new solar and wind with makeshift values by gentech
-# 2: Fill existing solar and wind with 2015 real values and repeating them 
-# year by year.
 print '  variable_capacity_factors.tab...'
-cur.execute("SELECT info.project_name, sample_tp_id, capacity_factor FROM switch.variable_capacity_factors_existing cf JOIN switch.project_info_new info ON (info.gen_tech=cf.project_name) JOIN switch.new_projects_sets np ON (np.project_id = info.project_id and new_projects_sets_id=%s) JOIN (SELECT * FROM switch.timescales_sample_timepoints JOIN switch.timescales_sample_timeseries USING (sample_ts_id) WHERE sample_ts_scenario_id=%s) tps ON TO_CHAR(cf.timestamp_cst,'MMDDHH24')=TO_CHAR(tps.timestamp,'MMDDHH24') \
-    UNION SELECT info.project_name, sample_tp_id, capacity_factor FROM switch.variable_capacity_factors_existing cf JOIN switch.project_info_existing info ON info.project_name = cf.project_name JOIN (SELECT * FROM switch.timescales_sample_timepoints JOIN switch.timescales_sample_timeseries USING (sample_ts_id) WHERE sample_ts_scenario_id=%s) tps ON TO_CHAR(cf.timestamp_cst,'MMDDHH24')=TO_CHAR(tps.timestamp,'MMDDHH24') AND existing_projects_id = %s \
-    ORDER BY 1,2;" % (new_projects_id,sample_ts_scenario_id,sample_ts_scenario_id, existing_projects_id))
-write_tab('variable_capacity_factors',['PROJECT','timepoint','proj_max_capacity_factor'],cur)
+cur.execute("""select project_id, raw_timepoint_id, cap_factor  
+  				FROM temp_ampl_study_timepoints 
+    			JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
+   				JOIN temp_variable_capacity_factors_historical ON(historic_hour=hour)
+    			JOIN temp_ampl__proposed_projects_v3 USING(project_id)
+    			JOIN temp_ampl_load_area_info_v3 USING(area_id)
+    			JOIN sampled_timepoint as t ON(raw_timepoint_id = timepoint_id)
+    			JOIN sampled_timeseries using(sampled_timeseries_id)
+  				WHERE load_scenario_id=21 -- not an input from scenarios. This id is related to historical timepoints table
+    			AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
+    			AND technology_id <> 7 
+    			AND t.study_timeframe_id={id}
+		UNION 
+				select project_id, raw_timepoint_id, cap_factor_adjusted as cap_factor  
+  				FROM temp_ampl_study_timepoints 
+    			JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
+    			JOIN temp_variable_capacity_factors_historical_csp ON(historic_hour=hour)
+    			JOIN temp_ampl__proposed_projects_v3 USING(project_id)
+    			JOIN temp_ampl_load_area_info_v3 USING(area_id)
+    			JOIN sampled_timepoint as t ON(raw_timepoint_id = timepoint_id)
+    			JOIN sampled_timeseries using(sampled_timeseries_id)
+  				WHERE load_scenario_id=21 -- not an input from scenarios. This id is related to historical timepoints table
+    			AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
+    			AND technology_id = 7
+    			AND t.study_timeframe_id={id};
+    			""").format(id=study_timeframe_id))
+write_tab('variable_capacity_factors',['GENERATION_PROJECT','timepoint','gen_max_capacity_factor'],cur)
 
 
-# Fill existing RoR projects. They have a constant flow per month,
-# specified for the first day of every month. This flow is multiplied by
-# the turbine's efficiency.
-print '  ror_capacity_factors.tab...'
-cur.execute("SELECT i.project_name, sample_tp_id, name, CASE WHEN (inflow*hydro_efficiency)/capacity_limit_mw < 1.2 THEN (inflow*hydro_efficiency)/capacity_limit_mw ELSE 1.2 END FROM switch.project_info_existing i JOIN switch.hydrologies h ON h.flow_name = i.project_name AND gen_tech='Hydro_RoR' \
-    JOIN (SELECT * FROM switch.timescales_sample_timepoints JOIN switch.timescales_sample_timeseries USING (sample_ts_id) JOIN switch.timescales_population_timeseries ts ON (ts.population_ts_id=sampled_from_population_timeseries_id) WHERE sample_ts_scenario_id=%s) tps ON (TO_CHAR(tps.timestamp,'MM') = TO_CHAR(h.year_month_day,'MM') AND existing_projects_id = %s) \
-    JOIN switch.hydro_scenarios s ON (s.period_id=tps.period_id AND h.hyd_year=s.hyd_year AND hyd_scenario_meta_id=%s)  \
-    ORDER BY 1,2,3;" % (sample_ts_scenario_id, existing_projects_id, hydro_scenario_meta_id))
-write_tab('ror_capacity_factors',['PROJECT','timepoint','scenario','ror_max_capacity_factor'],cur)
 
 
 # Clean-up

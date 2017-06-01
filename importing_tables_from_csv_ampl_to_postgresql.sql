@@ -119,6 +119,10 @@ where timepoint_year >= 2011 and timepoint_year <= 2051
 order by raw_timepoint_id;
 
 
+alter table sampled_timepoint drop CONSTRAINT sampled_timepoint_pkey;
+alter table sampled_timepoint add primary key (raw_timepoint_id, study_timeframe_id);
+
+
 ---------------------------------------------------------------------------
 -- Demand
 ---------------------------------------------------------------------------
@@ -540,28 +544,63 @@ COPY ampl__cap_factor_csp_6h_storage_adjusted
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl__cap_factor_csp_6h_storage_adjusted.csv'  
 DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
+-- Temporary solution to create capacity factors table -----
+
+-- Copying tables from ampl into temporary tables that we can use in get_switch_input_tables
+
+CREATE TABLE temp_load_scenario_historic_timepoints ( like ampl_load_scenario_historic_timepoints );
+
+insert into temp_load_scenario_historic_timepoints
+select * from ampl_load_scenario_historic_timepoints;
+
+CREATE TABLE temp_ampl_study_timepoints ( like ampl_study_timepoints );
+
+insert into temp_ampl_study_timepoints
+select * from ampl_study_timepoints;
+
+CREATE TABLE temp_variable_capacity_factors_historical ( like ampl__cap_factor_intermittent_sites_v2 );
+
+insert into temp_variable_capacity_factors_historical
+select * from ampl__cap_factor_intermittent_sites_v2;
+
+CREATE TABLE temp_ampl__proposed_projects_v3 ( like ampl__proposed_projects_v3 );
+
+insert into temp_ampl__proposed_projects_v3
+select * from ampl__proposed_projects_v3;
+
+CREATE TABLE temp_ampl_load_area_info_v3 ( like ampl_load_area_info_v3 );
+
+insert into temp_ampl_load_area_info_v3
+select * from ampl_load_area_info_v3;
+
+CREATE TABLE temp_variable_capacity_factors_historical_csp ( like ampl__cap_factor_csp_6h_storage_adjusted );
+
+insert into temp_variable_capacity_factors_historical_csp
+select * from ampl__cap_factor_csp_6h_storage_adjusted;
+
+--- not run and suspended -------------------------------:
 
 -- [Pending][Ask Josiah] choose subset of timepoints to insert in variable_capacity_factors
 -- insert into intermediate table for variable_capacity_factors
-select project_id, technology, timepoint_id, DATE_FORMAT(datetime_utc,'%Y%m%d%H') as hour, datetime_utc, cap_factor  
-  FROM ampl_study_timepoints 
-    JOIN ampl_load_scenario_historic_timepoints USING(timepoint_id)
-    JOIN ampl__cap_factor_intermittent_sites_v2 ON(historic_hour=hour)
-    JOIN ampl__proposed_projects_v3 USING(project_id)
-    JOIN ampl_load_area_info_v3 USING(area_id)
-  WHERE load_scenario_id=21 
-    AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
-    AND technology_id <> 7 
-UNION 
-select project_id, technology, timepoint_id, DATE_FORMAT(datetime_utc,'%Y%m%d%H') as hour, datetime_utc, cap_factor_adjusted as cap_factor  
-  FROM ampl_study_timepoints 
-    JOIN ampl_load_scenario_historic_timepoints USING(timepoint_id)
-    JOIN ampl__cap_factor_csp_6h_storage_adjusted ON(historic_hour=hour)
-    JOIN ampl__proposed_projects_v3 USING(project_id)
-    JOIN ampl_load_area_info_v3 USING(area_id)
-  WHERE load_scenario_id=21 
-    AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
-    AND technology_id = 7;
+--select project_id, technology, timepoint_id, DATE_FORMAT(datetime_utc,'%Y%m%d%H') as hour, datetime_utc, cap_factor  
+ -- FROM ampl_study_timepoints 
+  --  JOIN ampl_load_scenario_historic_timepoints USING(timepoint_id)
+  --  JOIN ampl__cap_factor_intermittent_sites_v2 ON(historic_hour=hour)
+  --  JOIN ampl__proposed_projects_v3 USING(project_id)
+  --  JOIN ampl_load_area_info_v3 USING(area_id)
+ -- WHERE load_scenario_id=21 
+ --   AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
+ --   AND technology_id <> 7 
+--UNION 
+--select project_id, technology, timepoint_id, DATE_FORMAT(datetime_utc,'%Y%m%d%H') as hour, datetime_utc, cap_factor_adjusted as cap_factor  
+ -- FROM ampl_study_timepoints 
+ --   JOIN ampl_load_scenario_historic_timepoints USING(timepoint_id)
+ --   JOIN ampl__cap_factor_csp_6h_storage_adjusted ON(historic_hour=hour)
+ --   JOIN ampl__proposed_projects_v3 USING(project_id)
+ --   JOIN ampl_load_area_info_v3 USING(area_id)
+ -- WHERE load_scenario_id=21 
+  --  AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
+   -- AND technology_id = 7;
 
 
 
