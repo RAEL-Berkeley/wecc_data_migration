@@ -341,8 +341,8 @@ with open('financials.dat','w') as f:
 print '  variable_capacity_factors.tab...'
 cur.execute("""select project_id, raw_timepoint_id, cap_factor  
   				FROM temp_ampl_study_timepoints 
-    			JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
-   				JOIN temp_variable_capacity_factors_historical ON(historic_hour=hour)
+   		 		JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
+    			JOIN temp_variable_capacity_factors_historical ON(historic_hour=hour)
     			JOIN temp_ampl__proposed_projects_v3 USING(project_id)
     			JOIN temp_ampl_load_area_info_v3 USING(area_id)
     			JOIN sampled_timepoint as t ON(raw_timepoint_id = timepoint_id)
@@ -350,7 +350,7 @@ cur.execute("""select project_id, raw_timepoint_id, cap_factor
   				WHERE load_scenario_id=21 -- not an input from scenarios. This id is related to historical timepoints table
     			AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
     			AND technology_id <> 7 
-    			AND t.study_timeframe_id={id}
+    			AND t.study_timeframe_id={id} 
 		UNION 
 				select project_id, raw_timepoint_id, cap_factor_adjusted as cap_factor  
   				FROM temp_ampl_study_timepoints 
@@ -363,7 +363,8 @@ cur.execute("""select project_id, raw_timepoint_id, cap_factor
   				WHERE load_scenario_id=21 -- not an input from scenarios. This id is related to historical timepoints table
     			AND (( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV') 
     			AND technology_id = 7
-    			AND t.study_timeframe_id={id};
+    			AND t.study_timeframe_id={id}
+    			order by 1,2;
     			""").format(id=study_timeframe_id))
 write_tab('variable_capacity_factors',['GENERATION_PROJECT','timepoint','gen_max_capacity_factor'],cur)
 
