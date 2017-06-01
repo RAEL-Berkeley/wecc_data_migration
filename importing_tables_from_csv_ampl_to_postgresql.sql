@@ -118,6 +118,35 @@ from ampl_study_timepoints
 where timepoint_year >= 2011 and timepoint_year <= 2051 
 order by raw_timepoint_id;
 
+-- Add 2006 historical timeseries.
+INSERT INTO raw_timeseries 
+SELECT 2006 as raw_timeseries_id,
+	1 as hours_per_tp,
+	8760 as num_timepoints,
+	'2006-01-01 00:00'::timestamp as first_timepoint_utc,
+	'2006-12-31 23:00'::timestamp as last_timepoint_utc,
+	2006 as start_year,
+	2006 as end_year,
+	NULL as description
+;
+
+insert into raw_timepoint (raw_timeseries_id, timestamp_utc)
+select raw_timeseries_id, generate_series as timestamp_utc
+from raw_timeseries,
+    generate_series('2006-01-01 00:00'::timestamp, 
+                    '2006-12-31 23:00', '1 hours')
+where raw_timeseries.raw_timeseries_id = 2006;
+
+INSERT INTO projection_to_future_timepoint 
+    (historical_timepoint_id, future_timepoint_id)
+    SELECT past.raw_timepoint_id as historical_timepoint_id,
+        future.raw_timepoint_id as future_timepoint_id
+--        , past.timestamp_utc, future.timestamp_utc
+    FROM raw_timepoint future, raw_timepoint past
+    WHERE future.timestamp_utc >= '2007-01-01 00:00'::timestamp
+	and extract( 'year' from past.timestamp_utc) = 2006
+        and past.timestamp_utc = future.timestamp_utc - interval '1 year' * (
+            extract( 'year' from future.timestamp_utc)-2006);
 
 alter table sampled_timepoint drop CONSTRAINT sampled_timepoint_pkey;
 alter table sampled_timepoint add primary key (raw_timepoint_id, study_timeframe_id);

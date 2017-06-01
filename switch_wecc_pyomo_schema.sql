@@ -43,12 +43,21 @@ COMMENT ON TABLE raw_timeseries
 
 CREATE TABLE raw_timepoint
 (
-  raw_timepoint_id int PRIMARY KEY,
+  raw_timepoint_id SERIAL PRIMARY KEY,
   raw_timeseries_id smallint REFERENCES raw_timeseries,
   timestamp_utc timestamp without time zone,
   UNIQUE (raw_timeseries_id, timestamp_utc),
   UNIQUE (raw_timepoint_id, timestamp_utc)
 );
+
+CREATE TABLE projection_to_future_timepoint
+(
+  historical_timepoint_id INTEGER REFERENCES raw_timepoint (raw_timepoint_id),
+  future_timepoint_id INTEGER REFERENCES raw_timepoint (raw_timepoint_id),
+  UNIQUE (historical_timepoint_id, future_timepoint_id)
+);
+COMMENT ON TABLE projection_to_future_timepoint
+  IS 'For now, we use a single projection method per database, so we do not include a projection_scenario_id column in this table.';
 
 CREATE TABLE study_timeframe
 (
