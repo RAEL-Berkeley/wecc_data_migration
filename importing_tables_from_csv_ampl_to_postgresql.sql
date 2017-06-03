@@ -459,7 +459,7 @@ order by 1, 2, 3;
 
 
 ---------------------------------------------------------------------------
--- [Pending] Variable capacity factors
+-- Variable capacity factors
 ---------------------------------------------------------------------------
 
 
@@ -485,14 +485,14 @@ alter table ampl_existing_intermittent_plant_cap_factor add primary key (project
 -- Probably delete this section and table ampl_cap_factor
 
 -- [Delete] If I don't proceed with Plan A, delete this table:
-create table if not exists ampl_cap_factor( 
-project_id INT, 
-load_area VARCHAR, 
-technology VARCHAR, 
-timepoint_id INT, 
-hour INT, 
-cap_factor DOUBLE PRECISION
-);
+--create table if not exists ampl_cap_factor( 
+--project_id INT, 
+--load_area VARCHAR, 
+--technology VARCHAR, 
+--timepoint_id INT, 
+--hour INT, 
+--cap_factor DOUBLE PRECISION
+--);
 
 -- Plan A. Its is running anyway, but I proceeded with plan B
 -- [Pending] waiting for the query to finish exporting the .csv on 
@@ -764,8 +764,28 @@ COPY ampl_hydro_monthly_limits_v2
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_hydro_monthly_limits_v2.csv'  
 DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
--- [Pending] insert into hydro_flow_data
--- It requires sampled_timeseries_id
+create table hydro_historical_monthly_capacity_factors(
+hydro_simple_scenario_id INT,
+generation_plant_id INT,
+year INT,
+month INT,
+hydro_min_flow_mw DOUBLE PRECISION,
+hydro_min_avg_mw DOUBLE PRECISION
+);
+
+alter table hydro_historical_monthly_capacity_factors add primary key (hydro_simple_scenario_id,
+generation_plant_id, year, month);
+
+alter table hydro_historical_monthly_capacity_factors add foreign key (hydro_simple_scenario_id)
+REFERENCES hydro_simple_scenario (hydro_simple_scenario_id) MATCH SIMPLE;
+
+alter table hydro_historical_monthly_capacity_factors add foreign key (generation_plant_id)
+REFERENCES generation_plant (generation_plant_id) MATCH SIMPLE;
+
+--continue here:
+insert into hydro_historical_monthly_capacity_factors
+select 1 as hydro_simple_scenario_id, project_id as generation_plant_id, 2006 as year, month,  0.5*avg_capacity_factor_hydro as hydro_min_flow_mw
+from ampl_hydro_monthly_limits_v2;
 
 
 ---------------------------------------------------------------------------

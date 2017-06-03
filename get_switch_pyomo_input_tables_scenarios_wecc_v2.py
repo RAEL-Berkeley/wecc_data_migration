@@ -368,8 +368,13 @@ cur.execute("""select project_id, raw_timepoint_id, cap_factor
     			""").format(id=study_timeframe_id))
 write_tab('variable_capacity_factors',['GENERATION_PROJECT','timepoint','gen_max_capacity_factor'],cur)
 
+########################################################
+# HYDROPOWER
 
-
+print '  hydro_timeseries.tab...'
+cur.execute("""
+    			""").format(id=study_timeframe_id))
+write_tab('hydro_timeseries',['hydro_project','timeseries','hydro_min_flow_mw', 'hydro_avg_flow_mw'],cur)
 
 # Clean-up
 shutdown()
