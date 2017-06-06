@@ -1,3 +1,4 @@
+#! /Users/pehidalg/anaconda/bin/python
 # -*- coding: utf-8 -*-
 # Copyright 2017 The Switch Authors. All rights reserved.
 # Licensed under the Apache License, Version 2, which is in the LICENSE file.
@@ -63,7 +64,7 @@ parser.add_argument(
     '-U', '--user', dest='user', type=str, default=getpass.getuser(), metavar='username',
     help='Database username')
 parser.add_argument(
-    '-D', '--database', dest='database', type=str, default='switch_wecc2', metavar='dbname',
+    '-D', '--database', dest='database', type=str, default='switch_wecc', metavar='dbname',
     help='Database name')
 parser.add_argument(
     '-s', type=int, required=True, metavar='scenario_id',
@@ -139,14 +140,14 @@ with open('scenario_params.txt', 'w') as f:
 # TIMESCALES
 
 print '  periods.tab...'
- cur.execute(("""select label, start_year as period_start, end_year as period_end
+cur.execute(("""select label, start_year as period_start, end_year as period_end
 				from period where study_timeframe_id={id}
 				oder by 1;
 				""").format(id=study_timeframe_id))			
 write_tab('periods', ['INVESTMENT_PERIOD', 'period_start', 'period_end'], cur)
 
 print '  timeseries.tab...'
-cur.execute("""select date_part('year', first_timepoint_utc)|| '_' || name as timeseries, t.label as ts_period, 
+cur.execute(("""select date_part('year', first_timepoint_utc)|| '_' || name as timeseries, t.label as ts_period, 
 				hours_per_tp as ts_duration_of_tp, num_timepoints as ts_num_tps, scaling_to_period as ts_scale_to_period
 				from switch.sampled_timeseries as t2
 				join period as t using(period_id)
@@ -156,7 +157,7 @@ cur.execute("""select date_part('year', first_timepoint_utc)|| '_' || name as ti
 write_tab('timeseries', ['TIMESERIES', 'ts_period', 'ts_duration_of_tp', 'ts_num_tps', 'ts_scale_to_period'], cur)
 
 print '  timepoints.tab...'
-cur.execute("""select raw_timepoint_id as timepoint_id, to_char(timestamp_utc, 'YYYYMMDDHH24') as timestamp, 
+cur.execute(("""select raw_timepoint_id as timepoint_id, to_char(timestamp_utc, 'YYYYMMDDHH24') as timestamp, 
 				date_part('year', first_timepoint_utc)|| '_' || name as timeseries
 				from sampled_timepoint as t
 				join sampled_timeseries using(sampled_timeseries_id)
@@ -177,7 +178,7 @@ cur.execute("""SELECT name, ccs_distance_km as zone_ccs_distance_km, load_zone_i
 write_tab('load_zones',['LOAD_ZONE','zone_ccs_distance_km','zone_dbid'],cur)
 
 print '  loads.tab...'
-cur.execute("""select load_zone_name, t.raw_timepoint_id as timepoint, demand_mw as zone_demand_mw
+cur.execute(("""select load_zone_name, t.raw_timepoint_id as timepoint, demand_mw as zone_demand_mw
 				from sampled_timepoint as t
 				join sampled_timeseries using(sampled_timeseries_id)
 				join demand_timeseries as d using(raw_timepoint_id)
@@ -309,10 +310,10 @@ cur.execue("""select generation_plant_id, build_year, capacity as gen_predetermi
 				where generation_plant_existing_and_planned_scenario_id=%s
 				;
 			""" % (generation_plant_existing_and_planned_scenario_id))
-write_tab('gen_build_predetermined',['GENERATION_PROJECT','build_year','gen_predetermined_cap],cur)
+write_tab('gen_build_predetermined',['GENERATION_PROJECT','build_year','gen_predetermined_cap'],cur)
 
 print '  gen_build_costs.tab...'
-cur.execute("""select project_id as generation_plant_id, start_year as label,  overnight_cost as gen_overnight_cost, fixed_o_m as gen_fixed_o_m
+cur.execute(("""select project_id as generation_plant_id, start_year as label,  overnight_cost as gen_overnight_cost, fixed_o_m as gen_fixed_o_m
 				from generation_plant_vintage_cost
 				union
 				select generation_plant_id, label, avg(overnight_cost) as gen_overnight_cost, avg(fixed_o_m) as gen_fixed_o_m
@@ -341,7 +342,7 @@ with open('financials.dat','w') as f:
 #Pyomo will raise an error if a capacity factor is defined for a project on a timepoint when it is no longer operational (i.e. Canela 1 was built on 2007 and has a 30 year max age, so for tp's ocurring later than 2037, its capacity factor must not be written in the table).
 
 print '  variable_capacity_factors.tab...'
-cur.execute("""select project_id, raw_timepoint_id, cap_factor  
+cur.execute(("""select project_id, raw_timepoint_id, cap_factor  
   				FROM temp_ampl_study_timepoints 
    		 		JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
     			JOIN temp_variable_capacity_factors_historical ON(historic_hour=hour)
@@ -374,7 +375,7 @@ write_tab('variable_capacity_factors',['GENERATION_PROJECT','timepoint','gen_max
 # HYDROPOWER
 
 print '  hydro_timeseries.tab...'
-cur.execute("""select generation_plant_id as hydro_project, 
+cur.execute(("""select generation_plant_id as hydro_project, 
 				date_part('year', first_timepoint_utc)|| '_' || name as timeseries,
 				hydro_min_flow_mw, hydro_avg_flow_mw
 				from hydro_historical_monthly_capacity_factors

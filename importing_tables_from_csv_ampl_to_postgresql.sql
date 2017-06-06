@@ -744,7 +744,7 @@ select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name,
 
 
 ---------------------------------------------------------------------------
--- [Pending] Hydropower
+-- Hydropower
 ---------------------------------------------------------------------------
 
 insert into hydro_simple_scenario
@@ -792,10 +792,11 @@ join generation_plant_existing_and_planned on(generation_plant_id = project_id);
 
 
 ---------------------------------------------------------------------------
--- [Pending] Scenarios
+-- Scenarios
 ---------------------------------------------------------------------------
 
-
+insert into scenario
+values (2, 'AMPL basecase', 'load_id=21, 2017 fuel costs from EIA, 2016 dollars', 2,2,21,1,1,1,1,1);
 
 
 
