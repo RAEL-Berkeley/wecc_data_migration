@@ -770,7 +770,7 @@ generation_plant_id INT,
 year INT,
 month INT,
 hydro_min_flow_mw DOUBLE PRECISION,
-hydro_min_avg_mw DOUBLE PRECISION
+hydro_avg_flow_mw DOUBLE PRECISION
 );
 
 alter table hydro_historical_monthly_capacity_factors add primary key (hydro_simple_scenario_id,
@@ -782,10 +782,13 @@ REFERENCES hydro_simple_scenario (hydro_simple_scenario_id) MATCH SIMPLE;
 alter table hydro_historical_monthly_capacity_factors add foreign key (generation_plant_id)
 REFERENCES generation_plant (generation_plant_id) MATCH SIMPLE;
 
---continue here:
+-- 12 months of data for 924 hydropower plants (count matches)
 insert into hydro_historical_monthly_capacity_factors
-select 1 as hydro_simple_scenario_id, project_id as generation_plant_id, 2006 as year, month,  0.5*avg_capacity_factor_hydro as hydro_min_flow_mw
-from ampl_hydro_monthly_limits_v2;
+select 1 as hydro_simple_scenario_id, project_id as generation_plant_id, 2006 as year, month,  
+0.5*avg_capacity_factor_hydro*capacity as hydro_min_flow_mw,
+avg_capacity_factor_hydro*capacity as hydro_avg_flow_mw
+from ampl_hydro_monthly_limits_v2 
+join generation_plant_existing_and_planned on(generation_plant_id = project_id);
 
 
 ---------------------------------------------------------------------------

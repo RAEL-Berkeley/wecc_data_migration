@@ -372,8 +372,14 @@ write_tab('variable_capacity_factors',['GENERATION_PROJECT','timepoint','gen_max
 # HYDROPOWER
 
 print '  hydro_timeseries.tab...'
-cur.execute("""
-    			""").format(id=study_timeframe_id))
+cur.execute("""select generation_plant_id as hydro_project, 
+				date_part('year', first_timepoint_utc)|| '_' || name as timeseries,
+				hydro_min_flow_mw, hydro_avg_flow_mw
+				from hydro_historical_monthly_capacity_factors
+				join sampled_timeseries on(month = date_part('month', first_timepoint_utc))
+				where hydro_simple_scenario_id={id1}
+				and study_timeframe_id = {id2};
+    			""").format(id1=hydro_simple_scenario_id, id2=study_timeframe_id))
 write_tab('hydro_timeseries',['hydro_project','timeseries','hydro_min_flow_mw', 'hydro_avg_flow_mw'],cur)
 
 # Clean-up
