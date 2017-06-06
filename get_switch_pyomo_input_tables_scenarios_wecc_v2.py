@@ -146,7 +146,8 @@ print '  periods.tab...'
 write_tab('periods', ['INVESTMENT_PERIOD', 'period_start', 'period_end'], cur)
 
 print '  timeseries.tab...'
-cur.execute("""select name, t.label as ts_period, hours_per_tp as ts_duration_of_tp, num_timepoints as ts_num_tps, scaling_to_period as ts_scale_to_period
+cur.execute("""select date_part('year', first_timepoint_utc)|| '_' || name as timeseries, t.label as ts_period, 
+				hours_per_tp as ts_duration_of_tp, num_timepoints as ts_num_tps, scaling_to_period as ts_scale_to_period
 				from switch.sampled_timeseries as t2
 				join period as t using(period_id)
 				where t2.study_timeframe_id={id}
@@ -155,7 +156,8 @@ cur.execute("""select name, t.label as ts_period, hours_per_tp as ts_duration_of
 write_tab('timeseries', ['TIMESERIES', 'ts_period', 'ts_duration_of_tp', 'ts_num_tps', 'ts_scale_to_period'], cur)
 
 print '  timepoints.tab...'
-cur.execute("""select raw_timepoint_id as timepoint_id, to_char(timestamp_utc, 'YYYYMMDDHH24') as timestamp, name
+cur.execute("""select raw_timepoint_id as timepoint_id, to_char(timestamp_utc, 'YYYYMMDDHH24') as timestamp, 
+				date_part('year', first_timepoint_utc)|| '_' || name as timeseries
 				from sampled_timepoint as t
 				join sampled_timeseries using(sampled_timeseries_id)
 				where t.study_timeframe_id={id}
