@@ -70,7 +70,7 @@ spinning_res_solar_frac DOUBLE PRECISION
 
 -- [Ask Josiah] missing data for quickstart
 insert into balancing_areas
-select balancing_area, load_only_spinning_reserve_requirement as spinning_res_load_frac, wind_spinning_reserve_requirement as spinning_res_wind_frac, spinning_res_solar_frac as spinning_res_solar_frac
+select balancing_area, load_only_spinning_reserve_requirement as spinning_res_load_frac, wind_spinning_reserve_requirement as spinning_res_wind_frac, solar_spinning_reserve_requirement as spinning_res_solar_frac
 from ampl_balancing_areas_tab;
 
 

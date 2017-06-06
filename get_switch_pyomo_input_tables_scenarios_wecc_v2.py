@@ -312,8 +312,8 @@ cur.execute("""select generation_plant_id, gen_tech, energy_source as gen_energy
 				""" ) 
 write_tab('generation_projects_info',['GENERATION_PROJECT','gen_tech','gen_energy_source','gen_load_zone','gen_max_age','gen_is_variable','gen_is_baseload','gen_full_load_heat_rate','gen_variable_o_m','gen_connect_cost_per_mw','gen_dbid','gen_scheduled_outage_rate','gen_forced_outage_rate','gen_capacity_limit_mw', 'gen_min_build_capacity', 'gen_is_cogen'],cur)
 
-print '	gen_build_predetermined.tab...'
-cur.execue("""select generation_plant_id, build_year, capacity as gen_predetermined_cap  
+print '  gen_build_predetermined.tab...'
+cur.execute("""select generation_plant_id, build_year, capacity as gen_predetermined_cap  
 				from generation_plant_existing_and_planned 
 				join generation_plant as t using(generation_plant_id)  
 				where generation_plant_existing_and_planned_scenario_id=%s
