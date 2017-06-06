@@ -114,7 +114,7 @@ cur = con.cursor()
 ############################################################################################################
 # These next variables determine which input data is used, though some are only for documentation and result exports.
 
-cur.execute("SELECT name, description, study_timeframe_id, time_sample_id, demand_scenario_id,  fuel_simple_price_scenario_id, generation_plant_scenario_id, generation_plant_cost_scenario_id, generation_plant_existing_and_planned_scenario_id, hydro_simple_scenario_id  FROM switch.scenario WHERE scenario_id = %s" % args.s)
+cur.execute("SELECT name, description, study_timeframe_id, time_sample_id, demand_scenario_id,  fuel_simple_price_scenario_id, generation_plant_scenario_id, generation_plant_cost_scenario_id, generation_plant_existing_and_planned_scenario_id, hydro_simple_scenario_id, carbon_cap_scenario_id  FROM switch.scenario WHERE scenario_id = %s" % args.s)
 s_details = cur.fetchone()
 #name, description, sample_ts_scenario_id, hydro_scenario_meta_id, fuel_id, gen_costs_id, new_projects_id, carbon_tax_id, carbon_cap_id, rps_id, lz_hourly_demand_id, gen_info_id, load_zones_scenario_id, existing_projects_id, demand_growth_id = s_details[1], s_details[2], s_details[3], s_details[4], s_details[5], s_details[6], s_details[7], s_details[8], s_details[9], s_details[10], s_details[11], s_details[12], s_details[13], s_details[14], s_details[15]
 name = s_details[0]
@@ -127,6 +127,7 @@ generation_plant_scenario_id = s_details[6]
 generation_plant_cost_scenario_id = s_details[7]
 generation_plant_existing_and_planned_scenario_id = s_details[8]
 hydro_simple_scenario_id = s_details[9]
+carbon_cap_scenario_id = s_details[10]
 
 os.chdir(args.i)
 
@@ -393,6 +394,32 @@ cur.execute(("""select generation_plant_id as hydro_project,
 				and study_timeframe_id = {id2};
     			""").format(id1=hydro_simple_scenario_id, id2=study_timeframe_id))
 write_tab('hydro_timeseries',['hydro_project','timeseries','hydro_min_flow_mw', 'hydro_avg_flow_mw'],cur)
+
+########################################################
+# CARBON CAP
+
+# future work: join with table with carbon_cost_dollar_per_tco2
+print '  carbon_policies.tab...'
+cur.execute(("""select period, AVG(carbon_cap_tco2_per_yr) as carbon_cap_tco2_per_yr, '.' as  carbon_cost_dollar_per_tco2
+				from 
+				(select carbon_cap_tco2_per_yr, year, 
+						(case when 
+						year >= period.start_year 
+						and year <= period.start_year + length_yrs -1 then label else 0 end) as period
+						from switch.carbon_cap
+						join switch.period on(year>=start_year)
+						where study_timeframe_id = {id1} and carbon_cap_scenario_id = {id2}) as w
+				where period!=0
+				group by period
+				order by 1;
+    			""").format(id1=study_timeframe_id, id2=carbon_cap_scenario_id))
+write_tab('carbon_policies',['PERIOD','carbon_cap_tco2_per_yr','carbon_cost_dollar_per_tco2'],cur)
+
+
+
+
+
+
 
 # Clean-up
 shutdown()

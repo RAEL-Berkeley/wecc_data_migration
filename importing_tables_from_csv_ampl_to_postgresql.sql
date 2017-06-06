@@ -707,6 +707,8 @@ COPY ampl_fuel_prices_v4
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_fuel_prices_v4.csv'  
 DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
+DROP TABLE fuel_simple_price;
+
 -- Table with fuel prices for all years. The idea is to join this table with the table with periods, 
 -- to generate the table fuel_simple_price.
 create table if not exists fuel_simple_price_yearly(
@@ -742,6 +744,21 @@ insert into fuel_simple_price_scenario
 select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
 'Fuel prices from SWITCH AMPL. Not Biomass. EIA energy outlook 2017 for Gas(_CCS), Coal(_CCS), DistillateFuelOil(_CCS), ResidualFuelOil(_CCS), and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
 
+-- Supply curve for biomass:
+create table if not exists ampl_biomass_solid_supply_curve_v3( 
+breakpoint_id int,
+load_area varchar,
+year int,
+price_dollars_per_mmbtu_surplus_adjusted double PRECISION,
+breakpoint_mmbtu_per_year double PRECISION,
+notes VARCHAR(300),
+primary key( load_area, year, price_dollars_per_mmbtu_surplus_adjusted)
+);
+
+COPY ampl_biomass_solid_supply_curve_v3 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_biomass_solid_supply_curve_v3.csv'  
+DELIMITER ',' NULL AS 'NULL' CSV HEADER;
+
 
 ---------------------------------------------------------------------------
 -- Hydropower
@@ -763,6 +780,8 @@ primary key(project_id, month)
 COPY ampl_hydro_monthly_limits_v2 
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_hydro_monthly_limits_v2.csv'  
 DELIMITER ',' NULL AS 'NULL' CSV HEADER;
+
+DROP TABLE hydro_flow_data;
 
 create table hydro_historical_monthly_capacity_factors(
 hydro_simple_scenario_id INT,
@@ -791,6 +810,81 @@ from ampl_hydro_monthly_limits_v2
 join generation_plant_existing_and_planned on(generation_plant_id = project_id);
 
 
+
+---------------------------------------------------------------------------
+-- [Pending] Policies: RPS and Carbon Cap
+---------------------------------------------------------------------------
+
+-- RPS:
+
+create table if not exists ampl_rps_compliance_entity_targets_v2(
+rps_compliance_entity VARCHAR,
+rps_compliance_type VARCHAR,
+rps_compliance_year INT,
+rps_compliance_fraction DOUBLE PRECISION,
+enable_rps int, -- this is really an id
+primary key(rps_compliance_entity, rps_compliance_type, rps_compliance_year, enable_rps)
+);
+
+COPY ampl_rps_compliance_entity_targets_v2 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_rps_compliance_entity_targets_v2.csv'  
+DELIMITER ',' NULL AS 'NULL' CSV HEADER;
+
+-- Pending: create table and write python code in switch to have RPS per load_zone
+
+
+-- Carbon Cap:
+
+create table if not exists ampl_carbon_cap_targets(
+carbon_cap_scenario_id INT,
+carbon_cap_scenario_name VARCHAR(300),
+year INT,
+carbon_emissions_relative_to_base DOUBLE PRECISION,
+primary key(carbon_cap_scenario_id, year)
+);
+
+COPY ampl_carbon_cap_targets 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_carbon_cap_targets.csv'  
+DELIMITER ',' NULL AS 'NULL' CSV HEADER;
+
+
+
+create table if not exists carbon_cap(
+carbon_cap_scenario_id INT,
+carbon_cap_scenario_name VARCHAR(300),
+year INT,
+carbon_cap_tco2_per_yr DOUBLE PRECISION,
+carbon_cost_dollar_per_tco2 DOUBLE PRECISION,
+primary key(carbon_cap_scenario_id, year)
+);
+
+create table if not exists carbon_emissions_historical(
+year INT,
+emissions_tco2 DOUBLE PRECISION,
+primary key (year)
+);
+-- from switch.mod in AMPL:
+--# the base (1990) carbon emissions in tCO2/Yr
+--param base_carbon_emissions = 284800000;
+insert into carbon_emissions_historical
+values (1990, 284800000);
+
+create table if not exists carbon_cost_yearly(
+carbon_cost_scenario_id INT,
+year INT,
+carbon_cost_dollar_per_tco2 DOUBLE PRECISION,
+primary key(carbon_cost_scenario_id, year)
+);
+
+insert into carbon_cap
+select carbon_cap_scenario_id, carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+;
+
+
+
+
 ---------------------------------------------------------------------------
 -- Scenarios
 ---------------------------------------------------------------------------
@@ -798,6 +892,9 @@ join generation_plant_existing_and_planned on(generation_plant_id = project_id);
 insert into scenario
 values (2, 'AMPL basecase', 'load_id=21, 2017 fuel costs from EIA, 2016 dollars', 2,2,21,1,1,1,1,1);
 
+alter table scenario add column carbon_cap_scenario_id INT;
+
+update scenario set carbon_cap_scenario_id = 35;
 
 
 
