@@ -2,3 +2,6 @@ tables_from_mysql
 switch-devnotes-master.zip
 switch-devnotes-master
 .ipynb_checkpoints
+!tables_from_mysql
+tables_from_mysql/*
+!tables_from_mysql/script_to_export_ampl_mysql_tables.sql
