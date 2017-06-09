@@ -167,6 +167,12 @@ CREATE TABLE load_zone
   reserves_area character varying(20),
   UNIQUE (load_zone_id, name)
 );
+SELECT AddGeometryColumn ('switch','load_zone','centroid',4326,'POINT',2);
+SELECT AddGeometryColumn ('switch','load_zone','boundary',4326,'MultiPolygon',2);
+-- Add spatial indexes to speed up joins and spatial queries
+CREATE INDEX load_zone_centroid_gix ON switch.load_zone USING GIST (centroid);
+CREATE INDEX load_zone_boundary_gix ON switch.load_zone USING GIST (boundary);
+
 
 -----------------------------
 -- Load time series
@@ -218,6 +224,9 @@ COMMENT ON TABLE transmission_lines
   IS 'This table contains all transmission lines defined in the simulation, regardless if the transmission line 
   currently exists or is merely being proposed. Transmission lines must only be defined in one direction. 
   Switch will automatically augment the model to allow for Tx in both directions. ';
+SELECT AddGeometryColumn ('switch','transmission_lines','geom',4326,'MultiLineString',2);
+CREATE INDEX transmission_lines_pathway_gix ON switch.transmission_lines USING GIST (geom);
+
 
 -----------------------------
 -- Energy Sources
