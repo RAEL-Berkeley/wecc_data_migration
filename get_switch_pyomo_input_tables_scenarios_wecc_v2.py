@@ -255,7 +255,7 @@ print '  trans_params.dat...'
 with open('trans_params.dat','w') as f:
     f.write("param trans_capital_cost_per_mw_km:=1150;\n") # $1150 opposed to $1000 to reflect change to US$2016
     f.write("param trans_lifetime_yrs:=20;\n") # Paty: check what lifetime has been used for the wecc
-    f.write("param trans_fixed_o_m_fraction:=0.03;\n")
+    f.write("param trans_fixed_om_fraction:=0.03;\n")
     #f.write("param distribution_loss_rate:=0.0652;\n")
 
 ########################################################
@@ -302,7 +302,7 @@ write_tab('fuel_cost',['load_zone','fuel','period','fuel_cost'],cur)
 print '  generation_projects_info.tab...'
 cur.execute("""select generation_plant_id, gen_tech, energy_source as gen_energy_source, t2.name as gen_load_zone, 
 				max_age as gen_max_age, is_variable as gen_is_variable, is_baseload as gen_is_baseload,
-				full_load_heat_rate as gen_full_load_heat_rate, variable_o_m as gen_variable_o_m,
+				full_load_heat_rate as gen_full_load_heat_rate, variable_o_m as gen_variable_om,
 				connect_cost_per_mw as gen_connect_cost_per_mw,
 				generation_plant_id as gen_dbid, scheduled_outage_rate as gen_scheduled_outage_rate,
 				forced_outage_rate as gen_forced_outage_rate, capacity_limit_mw as gen_capacity_limit_mw,
@@ -311,7 +311,7 @@ cur.execute("""select generation_plant_id, gen_tech, energy_source as gen_energy
 				join load_zone as t2 using(load_zone_id)
 				order by gen_dbid;
 				""" ) 
-write_tab('generation_projects_info',['GENERATION_PROJECT','gen_tech','gen_energy_source','gen_load_zone','gen_max_age','gen_is_variable','gen_is_baseload','gen_full_load_heat_rate','gen_variable_o_m','gen_connect_cost_per_mw','gen_dbid','gen_scheduled_outage_rate','gen_forced_outage_rate','gen_capacity_limit_mw', 'gen_min_build_capacity', 'gen_is_cogen'],cur)
+write_tab('generation_projects_info',['GENERATION_PROJECT','gen_tech','gen_energy_source','gen_load_zone','gen_max_age','gen_is_variable','gen_is_baseload','gen_full_load_heat_rate','gen_variable_om','gen_connect_cost_per_mw','gen_dbid','gen_scheduled_outage_rate','gen_forced_outage_rate','gen_capacity_limit_mw', 'gen_min_build_capacity', 'gen_is_cogen'],cur)
 
 print '  gen_build_predetermined.tab...'
 cur.execute("""select generation_plant_id, build_year, capacity as gen_predetermined_cap  
@@ -323,10 +323,10 @@ cur.execute("""select generation_plant_id, build_year, capacity as gen_predeterm
 write_tab('gen_build_predetermined',['GENERATION_PROJECT','build_year','gen_predetermined_cap'],cur)
 
 print '  gen_build_costs.tab...'
-cur.execute(("""select project_id as generation_plant_id, start_year as label,  overnight_cost as gen_overnight_cost, fixed_o_m as gen_fixed_o_m
+cur.execute(("""select project_id as generation_plant_id, start_year as label,  overnight_cost as gen_overnight_cost, fixed_o_m as gen_fixed_om
 				from generation_plant_vintage_cost
 				union
-				select generation_plant_id, label, avg(overnight_cost) as gen_overnight_cost, avg(fixed_o_m) as gen_fixed_o_m
+				select generation_plant_id, label, avg(overnight_cost) as gen_overnight_cost, avg(fixed_o_m) as gen_fixed_om
 				from generation_plant_cost 
 				JOIN generation_plant using(generation_plant_id) 
 				JOIN period on(build_year>=start_year and build_year<=end_year)

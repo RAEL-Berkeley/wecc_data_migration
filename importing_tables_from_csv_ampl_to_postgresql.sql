@@ -326,9 +326,7 @@ connect_cost_per_mw DOUBLE PRECISION,
 average_capacity_factor_intermittent  DOUBLE PRECISION 
 );
 
-COPY ampl_proposed_projects_tab 
-FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_proposed_projects_tab.csv'  
-DELIMITER ',' CSV HEADER;
+\COPY ampl_proposed_projects_tab FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_proposed_projects_tab.csv' DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
 -- Populating generation_plant table:
 
@@ -359,8 +357,9 @@ cast(t2.baseload as boolean) as is_baseload, cast(t2.cogen as boolean) as is_cog
 t2.max_store_rate as store_to_release_ratio,
 t2.storage_efficiency as storage_efficiency, t2.minimum_loading as min_load_fraction,
 t2.startup_mmbtu_per_mw as startup_fuel, t2.startup_cost_dollars_per_mw as startup_om
-from ampl_existing_plants_v3 as t join load_zone as t1 on(name = load_area) 
-				   join ampl_gen_info_scenario_v3 as t2 using(technology);
+from ampl_existing_plants_v3 as t 
+join load_zone as t1 on(name = load_area) 
+join ampl_gen_info_scenario_v3 as t2 using(technology);
 
 -- Editing so _EP is deleted from gen_tech names.
 update generation_plant set gen_tech = trim(trailing '_EP' from gen_tech);
@@ -384,9 +383,15 @@ t2.max_store_rate as store_to_release_ratio,
 t2.storage_efficiency as storage_efficiency, t2.minimum_loading as min_load_fraction,
 t2.startup_mmbtu_per_mw as startup_fuel, t2.startup_cost_dollars_per_mw as startup_om
 from ampl_proposed_projects_tab as t join load_zone as t1 on(name = load_area) 
-				   join ampl_gen_info_scenario_v3 as t2 using(technology)
-				   join ampl_generator_costs_tab as t3 using(technology)
-				   where year = 2010;	
+join ampl_gen_info_scenario_v3 as t2 using(technology)
+join ampl_generator_costs_tab as t3 using(technology)
+where year = 2010;	
+
+-- While geothermal plants can technically have a heat rate in reality, they don't have one in
+-- our model which treats geothermal plants as baseload with a zero cost for input heat.
+UPDATE generation_plant
+SET full_load_heat_rate=NULL
+WHERE gen_tech='Geothermal';
 
 insert into generation_plant_scenario
 select 1, 'Basecase from SWITCH AMPL', 'Basecase of power plants used in SWITCH AMPL. 1920 existing generators and 7412 proposed generators';
@@ -731,6 +736,13 @@ from ampl_fuel_prices_v4;
 
 update fuel_simple_price_yearly set fuel = 'Electricity' where fuel = 'Storage';
 
+-- insert a second scenario for fuels where there is no CCS
+insert into fuel_simple_price_yearly
+select 2 as fuel_simple_scenario_id, area_id as load_zone_id, load_area as load_zone_name, fuel, 
+year as projection_year, fuel_price, notes, eai_region
+from ampl_fuel_prices_v4
+where right(fuel,4) != '_CCS';
+
 
 -- fuel_simple_price table skipped here. This table is created in get_switch_input_tables 
 -- by joining fuel_simple_price_yearly with table with period_id
@@ -743,6 +755,13 @@ update fuel_simple_price_yearly set fuel = 'Electricity' where fuel = 'Storage';
 insert into fuel_simple_price_scenario
 select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
 'Fuel prices from SWITCH AMPL. Not Biomass. EIA energy outlook 2017 for Gas(_CCS), Coal(_CCS), DistillateFuelOil(_CCS), ResidualFuelOil(_CCS), and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
+
+
+insert into fuel_simple_price_scenario
+select 2 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
+'Fuel prices from SWITCH AMPL. Not Biomass, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
+
+
 
 -- Supply curve for biomass:
 create table if not exists ampl_biomass_solid_supply_curve_v3( 
@@ -890,7 +909,7 @@ from ampl_carbon_cap_targets
 ---------------------------------------------------------------------------
 
 insert into scenario
-values (2, 'AMPL basecase', 'load_id=21, 2017 fuel costs from EIA, 2016 dollars', 2,2,21,1,1,1,1,1);
+values (2, 'AMPL basecase', 'load_id=21, 2017 fuel costs from EIA, 2016 dollars', 2,2,21,2,1,1,1,1);
 
 alter table scenario add column carbon_cap_scenario_id INT;
 
