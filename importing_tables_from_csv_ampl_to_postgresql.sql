@@ -749,6 +749,12 @@ delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 
 delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Wind'
 delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Storage'
 
+-- [For now] Assigned fake cost (different from zero) to biomass so we can run a toy. 
+-- We plan to use supply curves for biomass instead.
+update fuel_simple_price_yearly set fuel_price = 0.5 
+where fuel in ('Bio_Gas', 'Bio_Solid', 'Bio_Liquid') 
+and fuel_simple_scenario_id=2;
+
 
 
 -- fuel_simple_price table skipped here. This table is created in get_switch_input_tables 

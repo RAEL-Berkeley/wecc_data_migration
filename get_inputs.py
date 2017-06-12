@@ -248,9 +248,11 @@ def main():
 	# TRANSMISSION
 	
 	print '  transmission_lines.tab...'
-	db_cursor.execute("""SELECT start_load_zone_id || '-' || end_load_zone_id, start_load_zone_id, end_load_zone_id, 
+	db_cursor.execute("""SELECT start_load_zone_id || '-' || end_load_zone_id, t1.name, t2.name, 
 					trans_length_km, trans_efficiency, existing_trans_cap_mw 
-					FROM switch.transmission_lines  
+					FROM switch.transmission_lines
+					join load_zone as t1 on(t1.load_zone_id=start_load_zone_id)
+					join load_zone as t2 on(t2.load_zone_id=end_load_zone_id)  
 					ORDER BY 2,3;
 					""")
 	write_tab('transmission_lines',['TRANSMISSION_LINE','trans_lz1','trans_lz2','trans_length_km','trans_efficiency','existing_trans_cap'],db_cursor)
