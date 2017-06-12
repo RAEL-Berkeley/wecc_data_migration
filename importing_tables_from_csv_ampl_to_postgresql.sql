@@ -743,6 +743,12 @@ year as projection_year, fuel_price, notes, eai_region
 from ampl_fuel_prices_v4
 where right(fuel,4) != '_CCS';
 
+delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Geothermal'
+delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Solar'
+delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Water'
+delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Wind'
+
+
 
 -- fuel_simple_price table skipped here. This table is created in get_switch_input_tables 
 -- by joining fuel_simple_price_yearly with table with period_id

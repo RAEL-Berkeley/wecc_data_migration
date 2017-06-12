@@ -29,14 +29,15 @@ order by 1, 2, 3 LIMIT 999999;
 
 
 
-
 select project_id, proposed_projects_v3.load_area, technology,
-       if(location_id is NULL, 0, location_id) as location_id,
-       if(ep_project_replacement_id is NULL, 0, ep_project_replacement_id) as ep_project_replacement_id,
-       if(capacity_limit is NULL, 0, capacity_limit) as capacity_limit,
-       if(capacity_limit_conversion is NULL, 0, capacity_limit_conversion) as capacity_limit_conversion,
-       heat_rate, cogen_thermal_demand, (1.15 * connect_cost_per_mw) as connect_cost_per_mw,
-       if(avg_cap_factor_intermittent is NULL, 0, avg_cap_factor_intermittent) as average_capacity_factor_intermittent 
+       if(location_id=0, NULL, location_id) as location_id,
+       ep_project_replacement_id,
+       capacity_limit,
+       capacity_limit_conversion,
+       if(heat_rate=0, NULL, heat_rate) as heat_rate, 
+       cogen_thermal_demand, 
+       (1.15 * connect_cost_per_mw) as connect_cost_per_mw,
+       avg_cap_factor_intermittent as average_capacity_factor_intermittent 
 from proposed_projects_v3 join load_area_info_v3 using (area_id) 
 where technology_id in (SELECT technology_id FROM generator_info_v3 where gen_info_scenario_id=13) 
       AND ((( avg_cap_factor_percentile_by_intermittent_tech >= 0.75 or cumulative_avg_MW_tech_load_area <= 3 * total_yearly_load_mwh / 8766 or rank_by_tech_in_load_area <= 5 or avg_cap_factor_percentile_by_intermittent_tech is null) and technology <> 'Concentrating_PV'))
