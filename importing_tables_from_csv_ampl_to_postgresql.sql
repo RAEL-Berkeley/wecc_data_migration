@@ -747,6 +747,7 @@ delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 
 delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Solar'
 delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Water'
 delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Wind'
+delete from fuel_simple_price_yearly where fuel_simple_scenario_id=2 and fuel = 'Storage'
 
 
 
