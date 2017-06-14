@@ -267,7 +267,10 @@ startup_cost_dollars_per_mw  DOUBLE PRECISION
 COPY ampl_gen_info_scenario_v3 
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_gen_info_scenario_v3.csv'  
 DELIMITER ',' CSV HEADER;
-
+UPDATE ampl_gen_info_scenario_v3 
+SET max_age_years=200
+WHERE fuel='Water'
+;
 
 -- Note: all in US$2016 (as the rest of the tables from AMPL)
 create table if not exists ampl_generator_costs_tab( 
@@ -345,18 +348,18 @@ average_capacity_factor_intermittent  DOUBLE PRECISION
 
 -- Inserting existing generators
 insert into generation_plant (generation_plant_id, name, gen_tech, load_zone_id, connect_cost_per_mw, variable_o_m,
-forced_outage_rate, scheduled_outage_rate, full_load_heat_rate, max_age, min_build_capacity, is_variable, is_baseload,
-is_cogen, energy_source, store_to_release_ratio, storage_efficiency, min_load_fraction, startup_fuel, startup_om)
+	forced_outage_rate, scheduled_outage_rate, full_load_heat_rate, max_age, min_build_capacity, is_variable, is_baseload,
+	is_cogen, energy_source, store_to_release_ratio, storage_efficiency, min_load_fraction, startup_fuel, startup_om)
 select t.project_id as generation_plant_id, t.plant_name as name, t.technology as gen_tech, 
-t1.load_zone_id as load_zone_id, t.connect_cost_per_mw as connect_cost_per_mw, -- as capacity_limit,
-t.variable_o_m as variable_o_m, t2.forced_outage_rate as forced_outage_rate, 
-t2.scheduled_outage_rate as scheduled_outage_rate, t.heat_rate as full_load_heat_rate, t2.max_age_years as max_age,
-t2.min_build_capacity as min_build_capacity, cast(t2.intermittent as boolean) as is_variable, 
-cast(t2.baseload as boolean) as is_baseload, cast(t2.cogen as boolean) as is_cogen, 
-(CASE WHEN t2.fuel= 'Storage' THEN 'Electricity' ELSE t2.fuel END) as energy_source, 
-t2.max_store_rate as store_to_release_ratio,
-t2.storage_efficiency as storage_efficiency, t2.minimum_loading as min_load_fraction,
-t2.startup_mmbtu_per_mw as startup_fuel, t2.startup_cost_dollars_per_mw as startup_om
+	t1.load_zone_id as load_zone_id, t.connect_cost_per_mw as connect_cost_per_mw, -- as capacity_limit,
+	t.variable_o_m as variable_o_m, t2.forced_outage_rate as forced_outage_rate, 
+	t2.scheduled_outage_rate as scheduled_outage_rate, t.heat_rate as full_load_heat_rate, t2.max_age_years as max_age,
+	t2.min_build_capacity as min_build_capacity, cast(t2.intermittent as boolean) as is_variable, 
+	cast(t2.baseload as boolean) as is_baseload, cast(t2.cogen as boolean) as is_cogen, 
+	(CASE WHEN t2.fuel= 'Storage' THEN 'Electricity' ELSE t2.fuel END) as energy_source, 
+	t2.max_store_rate as store_to_release_ratio,
+	t2.storage_efficiency as storage_efficiency, t2.minimum_loading as min_load_fraction,
+	t2.startup_mmbtu_per_mw as startup_fuel, t2.startup_cost_dollars_per_mw as startup_om
 from ampl_existing_plants_v3 as t 
 join load_zone as t1 on(name = load_area) 
 join ampl_gen_info_scenario_v3 as t2 using(technology);
@@ -386,6 +389,9 @@ from ampl_proposed_projects_tab as t join load_zone as t1 on(name = load_area)
 join ampl_gen_info_scenario_v3 as t2 using(technology)
 join ampl_generator_costs_tab as t3 using(technology)
 where year = 2010;	
+
+update generation_plant 
+
 
 -- While geothermal plants can technically have a heat rate in reality, they don't have one in
 -- our model which treats geothermal plants as baseload with a zero cost for input heat.

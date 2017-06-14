@@ -1,0 +1,21 @@
+-- Inspect old hydro plants.. how much capacity should potentially be retired (>100 years)
+-- The oldest plant (Santa Ana 1) was built in 1900 and was still operating in 2016.
+-- http://www.energy.ca.gov/almanac/renewables_data/hydro/
+-- Less than 2% of hydro capacity is more than 100 years old, so including all of it that is
+-- still registered as operational with EIA seems fine. 
+SELECT round(generation_plant_existing_and_planned.build_year,-1) as bld_decade, 
+	SUM(capacity), 
+	SUM(capacity) / (
+		SELECT sum(capacity) AS total_hydro_capacity
+		FROM generation_plant JOIN generation_plant_existing_and_planned USING(generation_plant_id) WHERE energy_source = 'Water'
+	) AS percent_of_hydro_cap
+--	generation_plant_existing_and_planned.*, generation_plant.*
+FROM generation_plant
+	JOIN generation_plant_existing_and_planned USING(generation_plant_id)
+WHERE energy_source = 'Water'
+GROUP BY bld_decade
+ORDER BY bld_decade
+;
+
+-- Hydro lifetime considerations (blog): http://www.waterpowermagazine.com/features/featurelife-span-of-storage-dams
+-- Hydro lifetime considerations (official report): https://www.irena.org/documentdownloads/publications/re_technologies_cost_analysis-hydropower.pdf
