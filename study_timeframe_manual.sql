@@ -143,10 +143,10 @@ INSERT INTO study_timeframe(
 
 INSERT INTO period(
             study_timeframe_id, period_id, start_year, label, length_yrs, end_year)
-    VALUES (3, 1, 2016, 2020, 10, 2025),
-           (3, 2, 2026, 2030, 10, 2035),
-           (3, 3, 2036, 2040, 10, 2045),
-           (3, 4, 2046, 2050, 10, 2055),
+    VALUES (3, 5, 2016, 2020, 10, 2025),
+           (3, 6, 2026, 2030, 10, 2035),
+           (3, 7, 2036, 2040, 10, 2045),
+           (3, 8, 2046, 2050, 10, 2055),
     ;
     
     
@@ -161,8 +161,55 @@ SELECT study_timeframe_id, period_id, raw_timeseries_id
 ;
 
 
+create table if not exists ampl_timepoints_1112 (
+timepoint_id INT, 
+hour INT,
+period INT,
+date INT,
+hours_in_sample DOUBLE PRECISION,
+month_of_year INT,
+hour_of_day INT,
+PRIMARY KEY (timepoint_id)
+);
 
-    
+
+COPY ampl_timepoints_1112 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_timepoints_1112.csv'  
+DELIMITER ',' CSV HEADER;
+
+-- continue executing here:
+-- A particular sample from a study timeframe that will be used for investment optimization
+INSERT INTO time_sample(
+            time_sample_id, study_timeframe_id, name, method, description)
+    VALUES (3,3,'AMPL timepoints','AMPL method','training_set_id=1112 from AMPL. 576 timepoints');
+-- Timeseries included in this sample: 2 days for the first period, and 1 day for the second.
+INSERT INTO sampled_timeseries(
+            sampled_timeseries_id, study_timeframe_id, time_sample_id, period_id, 
+            name, hours_per_tp, num_timepoints, first_timepoint_utc, last_timepoint_utc, 
+            scaling_to_period)
+    VALUES (7, 3, 3, 5, 
+            '2020_jan_16', 4, 6, '2020-01-16 02:00:00', '2020-01-16 22:00:00', 
+            365*10*2/(12.0*30)),
+           (8, 3, 3, 5, 
+            '2020_jan_17', 4, 6, '2020-01-17 02:00:00', '2020-01-17 22:00:00', 
+            365*10*28/(12.0*30)),
+        	(9, 3, 3, 5, 
+            '2020_feb_02', 4, 6, '2020-02-02 02:00:00', '2020-02-02 22:00:00', 
+            365*10*2/(12.0*30)),
+           (10, 3, 3, 5, 
+            '2020_feb_17', 4, 6, '2020-02-17 02:00:00', '2020-02-17 22:00:00', 
+            365*10*28/(12.0*30)),
+            
+            
+            
+            
+            
+           (9, 3, 3, 5, 
+            'Spring day', 2, 12, '2027-04-01 08:00:00', '2027-04-02 07:00:00', 
+            365 * 5),
+            (9, 3, 3, 8, 
+            'Spring day', 2, 12, '2027-04-01 08:00:00', '2027-04-02 07:00:00', 
+            365 * 5);    
     
     
     
