@@ -177,47 +177,92 @@ COPY ampl_timepoints_1112
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_timepoints_1112.csv'  
 DELIMITER ',' CSV HEADER;
 
--- continue executing here:
+
 -- A particular sample from a study timeframe that will be used for investment optimization
 INSERT INTO time_sample(
             time_sample_id, study_timeframe_id, name, method, description)
     VALUES (3,3,'AMPL timepoints','AMPL method','training_set_id=1112 from AMPL. 576 timepoints');
--- Timeseries included in this sample: 2 days for the first period, and 1 day for the second.
+
+
+--ampl_sampled_timeseries_from_AMPL.csv
+create table if not exists ampl_sampled_timeseries_from_AMPL (
+sampled_timeseries_id INT, 
+study_timeframe_id INT,
+time_sample_id INT,
+period_id INT,
+name VARCHAR,
+hours_per_tp INT,
+num_timepoints INT,
+first_timepoint_utc timestamp,
+last_timepoint_utc timestamp,
+scaling_to_period DOUBLE PRECISION,
+hours_in_sample DOUBLE PRECISION
+);
+
+
+COPY ampl_sampled_timeseries_from_AMPL 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_sampled_timeseries_from_AMPL.csv'  
+DELIMITER ',' CSV HEADER;
+
+
+-- scaling_to_period notes: (4*6* 365*10*2/(12.0*30)) peak day   +   4*6*365*10*28/(12.0*30)) median day  ) * 12 months = 87000 hours in 10 years
+-- The sum of hours_per_tp * num_timepoints * scaling_to_period for all timeseries in a period should equal the 
+-- number of hours in that period.';
 INSERT INTO sampled_timeseries(
             sampled_timeseries_id, study_timeframe_id, time_sample_id, period_id, 
             name, hours_per_tp, num_timepoints, first_timepoint_utc, last_timepoint_utc, 
             scaling_to_period)
-    VALUES (7, 3, 3, 5, 
-            '2020_jan_16', 4, 6, '2020-01-16 02:00:00', '2020-01-16 22:00:00', 
-            365*10*2/(12.0*30)),
-           (8, 3, 3, 5, 
-            '2020_jan_17', 4, 6, '2020-01-17 02:00:00', '2020-01-17 22:00:00', 
-            365*10*28/(12.0*30)),
-        	(9, 3, 3, 5, 
-            '2020_feb_02', 4, 6, '2020-02-02 02:00:00', '2020-02-02 22:00:00', 
-            365*10*2/(12.0*30)),
-           (10, 3, 3, 5, 
-            '2020_feb_17', 4, 6, '2020-02-17 02:00:00', '2020-02-17 22:00:00', 
-            365*10*28/(12.0*30)),
-            
-            
-            
-            
-            
-           (9, 3, 3, 5, 
-            'Spring day', 2, 12, '2027-04-01 08:00:00', '2027-04-02 07:00:00', 
-            365 * 5),
-            (9, 3, 3, 8, 
-            'Spring day', 2, 12, '2027-04-01 08:00:00', '2027-04-02 07:00:00', 
-            365 * 5);    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+SELECT sampled_timeseries_id, study_timeframe_id, time_sample_id, period_id, name, hours_per_tp, num_timepoints, 
+		first_timepoint_utc, last_timepoint_utc, scaling_to_period
+FROM ampl_sampled_timeseries_from_AMPL;
+        
+        
+        
+        
+        
+        
+-- continue executing here:            
+INSERT INTO sampled_timepoint(
+            raw_timepoint_id, study_timeframe_id, time_sample_id, sampled_timeseries_id, 
+            period_id, timestamp_utc)
+SELECT  t.timepoint_id as raw_timepoint_id, 
+		3 as study_timeframe_id, 
+		3 as time_sample_id, 
+		t2.sampled_timeseries_id as sampled_timeseries_id, 
+		period_id,
+		hour as timestamp_utc		-- working on this one
+FROM ampl_timepoints_1112 as t 
+JOIN sampled_timeseries as t2 ON(	(substring(name from 1 for 4) || substring(name from 5 for 2) || substring(name from 7 for 2))=t.date)
+
+
+
+
+
+--select extract(hour from timestamp '2001-02-16 20:38:40');
+
+--select to_char(2020011602, '9999999999');
+
+--select 	to_char(125, '999');
+
+--select to_timestamp(2020011602, );
+
+select to_timestamp('05 Dec 2000', 'DD Mon YYYY');
+
+select to_timestamp('2020-01-16-15', 'YYYY-MM-DD-HH24') at time zone 'PST';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
