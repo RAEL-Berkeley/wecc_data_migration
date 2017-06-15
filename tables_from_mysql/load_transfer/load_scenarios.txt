@@ -1,0 +1,3 @@
+demand_scenario_id	name	description
+31	FROZ	"Frozen efficiency - no improvements to energy efficiency"
+35	AGR_E	"Aggressive efficiency - significant deployment of energy efficiency"
