@@ -1,4 +1,9 @@
--- A one-off study timeframe and time sampling for debugging
+
+
+
+-- A one-off study timeframe and time sampling for debugging ------------------------------
+
+-------------------------------------------------------------------------------------------
 
 -- Defines investment periods and all known timeseries/points that fall in each period
 INSERT INTO study_timeframe(
@@ -64,6 +69,8 @@ WHERE study_timeframe.study_timeframe_id = 1
 
 -- Another study timeframe for more debugging. Not for now: 8AM of Jan 1st is a complicated hour (might have bot been sampled)
 
+------------------------------------------------------------------------------------------------------------------------
+
 -- Defines investment periods and all known timeseries/points that fall in each period
 INSERT INTO study_timeframe(
             study_timeframe_id, name, description)
@@ -120,3 +127,50 @@ WHERE study_timeframe.study_timeframe_id = 2
     AND extract('hour' from 
             raw_timepoint.timestamp_utc - sampled_timeseries.first_timepoint_utc
            )::int % hours_per_tp::int = 0;
+           
+           
+           
+           
+           
+-- Old AMPL study timeframe -------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+
+-- Defines investment periods and all known timeseries/points that fall in each period
+INSERT INTO study_timeframe(
+            study_timeframe_id, name, description)
+    VALUES (3,'Old AMPL timeframe','training_set_id=1112 from AMPL runs');
+
+INSERT INTO period(
+            study_timeframe_id, period_id, start_year, label, length_yrs, end_year)
+    VALUES (3, 1, 2016, 2020, 10, 2025),
+           (3, 2, 2026, 2030, 10, 2035),
+           (3, 3, 2036, 2040, 10, 2045),
+           (3, 4, 2046, 2050, 10, 2055),
+    ;
+    
+    
+INSERT INTO period_all_timeseries(
+    study_timeframe_id, period_id, raw_timeseries_id)
+SELECT study_timeframe_id, period_id, raw_timeseries_id
+    FROM study_timeframe
+    JOIN period USING(study_timeframe_id)
+    JOIN raw_timeseries ON(raw_timeseries.start_year >= period.start_year  and 
+                           raw_timeseries.end_year <= period.start_year + period.length_yrs - 1)
+    where study_timeframe_id=3
+;
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
