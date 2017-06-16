@@ -87,5 +87,12 @@ order by 1) as w
 CROSS JOIN (SELECT @cnt := 6) AS dummy
 group by w.period, w.month_of_year, w.date, w.hours_in_sample;
 
-select concat(substring('1a234',2,3), 'ocho');
+
+-- mapping table
+SELECT 
+  timepoint_id,
+  datetime_utc
+FROM _training_set_timepoints JOIN study_timepoints  USING (timepoint_id) 
+WHERE training_set_id=1112
+order by 1;
 

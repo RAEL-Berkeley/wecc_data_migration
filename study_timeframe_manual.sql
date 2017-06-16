@@ -217,40 +217,67 @@ SELECT sampled_timeseries_id, study_timeframe_id, time_sample_id, period_id, nam
 FROM ampl_sampled_timeseries_from_AMPL;
         
         
+create table if not exists ampl_mapping_table_timeframe_AMPL (
+timepoint_id INT,
+datetime_utc timestamp
+);
+
+COPY ampl_mapping_table_timeframe_AMPL 
+FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_mapping_table_timeframe_AMPL.csv'  
+DELIMITER ',' CSV HEADER;
+
         
-        
-        
-        
--- continue executing here:            
+-- JOIN did not work, so I'm adding columns to join to avoid suing functions in the join clause
+alter table ampl_timepoints_1112 add column timestamp_utc timestamp;
+
+
+-- update later: sampled_timeseries_id
 INSERT INTO sampled_timepoint(
-            raw_timepoint_id, study_timeframe_id, time_sample_id, sampled_timeseries_id, 
+            raw_timepoint_id, study_timeframe_id, time_sample_id,
             period_id, timestamp_utc)
-SELECT  t.timepoint_id as raw_timepoint_id, 
+SELECT  timepoint_id as raw_timepoint_id, 
 		3 as study_timeframe_id, 
 		3 as time_sample_id, 
-		t2.sampled_timeseries_id as sampled_timeseries_id, 
-		period_id,
-		hour as timestamp_utc		-- working on this one
-FROM ampl_timepoints_1112 as t 
-JOIN sampled_timeseries as t2 ON(	(substring(name from 1 for 4) || substring(name from 5 for 2) || substring(name from 7 for 2))=t.date)
+		(case when period = 2016 then 5
+            when period = 2026 then 6
+            when period = 2036 then 7
+            when period = 2046 then 8
+            else -1 end) as period_id, 
+       	datetime_utc as timestamp_utc
+FROM ampl_timepoints_1112
+JOIN ampl_mapping_table_timeframe_AMPL USING(timepoint_id)
+ORDER BY timepoint_id;
 
 
+update sampled_timepoint set sampled_timeseries_id= (select sampled_timeseries_id 
+														from sampled_timeseries 
+														where sampled_timepoint.timestamp_utc >= first_timepoint_utc 
+														and sampled_timepoint.timestamp_utc <= last_timepoint_utc 
+														group by sampled_timeseries_id) where raw_timepoint_id=88010 and study_timeframe_id=3 and time_sample_id=3;
+
+ 
+do $$
+  declare
+    arow record;
+    foo int;
+  begin
+    for arow in
+      (select raw_timepoint_id 
+	from sampled_timepoint 
+	where study_timeframe_id=3 and  time_sample_id=3 order by raw_timepoint_id) 
+    loop
+      update sampled_timepoint set sampled_timeseries_id= (select sampled_timeseries_id 
+														from sampled_timeseries 
+														where sampled_timepoint.timestamp_utc >= first_timepoint_utc 
+														and sampled_timepoint.timestamp_utc <= last_timepoint_utc 
+														group by sampled_timeseries_id) where raw_timepoint_id=arow.raw_timepoint_id and study_timeframe_id=3 and time_sample_id=3;
+
+    end loop;
+  end;
+$$;
 
 
-
---select extract(hour from timestamp '2001-02-16 20:38:40');
-
---select to_char(2020011602, '9999999999');
-
---select 	to_char(125, '999');
-
---select to_timestamp(2020011602, );
-
-select to_timestamp('05 Dec 2000', 'DD Mon YYYY');
-
-select to_timestamp('2020-01-16-15', 'YYYY-MM-DD-HH24') at time zone 'PST';
-
-
+ 
 
 
 
