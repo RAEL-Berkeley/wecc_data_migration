@@ -6,3 +6,4 @@ switch-devnotes-master
 tables_from_mysql/*
 !tables_from_mysql/script_to_export_ampl_mysql_tables.sql
 !tables_from_mysql/load_transfer
+*pyc
