@@ -974,8 +974,39 @@ values (3,
 		1, -- hydro_simple_scenario_id
 		35 -- carbon_cap_scenario_id
 		); 
+		
+		
+-- new synthetic hydro scenario		
+insert into scenario
+values (4, 
+		'70% of hydro, toy', 
+		'Reduced hydro to 70% from basecase, toy_2 timepoints, load_id=21, 2017 fuel costs from EIA, 2016 dollars',
+		2, -- study_timeframe_id
+		2, -- time_sample_id
+		21, -- demand_scenario_id
+		2, -- fuel_simple_price_scenario
+		1, -- generation_plant_scenario_id
+		1, -- generation_plant_cost_scenario_id
+		1, -- generation_plant_existing_and_planned_scenario_id
+		4, -- hydro_simple_scenario_id
+		35 -- carbon_cap_scenario_id
+		); 
 
-
+-- new synthetic hydro scenario		
+insert into scenario
+values (5, 
+		'60% of hydro, toy', 
+		'Reduced hydro to 60% from basecase, toy_2 timepoints, load_id=21, 2017 fuel costs from EIA, 2016 dollars',
+		2, -- study_timeframe_id
+		2, -- time_sample_id
+		21, -- demand_scenario_id
+		2, -- fuel_simple_price_scenario
+		1, -- generation_plant_scenario_id
+		1, -- generation_plant_cost_scenario_id
+		1, -- generation_plant_existing_and_planned_scenario_id
+		5, -- hydro_simple_scenario_id
+		35 -- carbon_cap_scenario_id
+		); 
 
 
 
