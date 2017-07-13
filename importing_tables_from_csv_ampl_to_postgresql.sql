@@ -849,6 +849,32 @@ join generation_plant_existing_and_planned on(generation_plant_id = project_id);
 
 
 
+-- Adding new hydro scenario: capacity factors reduced by 30% (i.e. 0.7*avg_capacity_factor_hydro)
+insert into hydro_simple_scenario
+select 4 as hydro_simple_scenario_id, '70% of water' as name, 
+'70% of water from basecase from SWITCH AMPL' as description;
+
+insert into hydro_historical_monthly_capacity_factors
+select 4 as hydro_simple_scenario_id, project_id as generation_plant_id, 2006 as year, month,  
+0.5*avg_capacity_factor_hydro*capacity as hydro_min_flow_mw,
+0.7*avg_capacity_factor_hydro*capacity as hydro_avg_flow_mw
+from ampl_hydro_monthly_limits_v2 
+join generation_plant_existing_and_planned on(generation_plant_id = project_id);
+
+-- Adding new hydro scenario: capacity factors reduced by 40% (i.e. 0.6*avg_capacity_factor_hydro)
+insert into hydro_simple_scenario
+select 5 as hydro_simple_scenario_id, '60% of water' as name, 
+'60% of water from basecase from SWITCH AMPL' as description;
+
+insert into hydro_historical_monthly_capacity_factors
+select 5 as hydro_simple_scenario_id, project_id as generation_plant_id, 2006 as year, month,  
+0.5*avg_capacity_factor_hydro*capacity as hydro_min_flow_mw,
+0.6*avg_capacity_factor_hydro*capacity as hydro_avg_flow_mw
+from ampl_hydro_monthly_limits_v2 
+join generation_plant_existing_and_planned on(generation_plant_id = project_id);
+
+
+
 ---------------------------------------------------------------------------
 -- [Pending] Policies: RPS and Carbon Cap
 ---------------------------------------------------------------------------
