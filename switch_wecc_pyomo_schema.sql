@@ -302,6 +302,18 @@ COMMENT ON TABLE generation_plant
   that includes several generating units, or an aggregation of several different plants that can be dispatched 
   together without regard for unit commitment considerations. The columns without NOT NULL constraints are optional, 
   and should only be populated if that field is relevant for a particular generation project.';
+SELECT AddGeometryColumn ('switch', 'generation_plant', 'geom', 
+                          4326, 'ST_Point', 2);
+CREATE INDEX generation_plant_centroid_gix 
+    ON switch.generation_plant USING GIST (geom);
+SELECT AddGeometryColumn ('switch', 'generation_plant', 'substation_connection_geom', 
+                          4326, 'MULTILINESTRING', 2);
+CREATE INDEX generation_plant_connection_gix 
+    ON switch.generation_plant USING GIST (substation_connection_geom);
+SELECT AddGeometryColumn ('switch', 'generation_plant', 'geom_area', 
+                          4326, 'MULTIPOLYGON', 2);
+CREATE INDEX generation_plant_area_gix 
+    ON switch.generation_plant USING GIST (geom_area);
 
 CREATE TABLE generation_plant_scenario
 (
