@@ -61,7 +61,7 @@ COMMENT ON TABLE projection_to_future_timepoint
 
 CREATE TABLE study_timeframe
 (
-  study_timeframe_id smallint PRIMARY KEY,
+  study_timeframe_id SERIAL PRIMARY KEY,
   name character varying(30) NOT NULL,
   description text
 );
@@ -71,11 +71,12 @@ COMMENT ON TABLE study_timeframe
 
 CREATE TABLE period
 (
-  study_timeframe_id smallint REFERENCES study_timeframe,
-  period_id smallint PRIMARY KEY,
+  study_timeframe_id integer REFERENCES study_timeframe,
+  period_id SERIAL PRIMARY KEY,
   start_year smallint NOT NULL,
   label smallint NOT NULL,
   length_yrs smallint,
+  end_year integer,
   UNIQUE (study_timeframe_id, period_id)
 );
 COMMENT ON TABLE period
@@ -84,8 +85,8 @@ COMMENT ON TABLE period
 
 CREATE TABLE period_all_timeseries
 (
-  study_timeframe_id smallint REFERENCES study_timeframe,
-  period_id smallint REFERENCES period,
+  study_timeframe_id integer REFERENCES study_timeframe,
+  period_id integer REFERENCES period,
   raw_timeseries_id smallint REFERENCES raw_timeseries,
   PRIMARY KEY (study_timeframe_id, period_id, raw_timeseries_id),
   UNIQUE (period_id, raw_timeseries_id),
@@ -102,8 +103,8 @@ COMMENT ON TABLE period_all_timeseries
 
 CREATE TABLE time_sample
 (
-  time_sample_id smallint PRIMARY KEY,
-  study_timeframe_id smallint REFERENCES study_timeframe,
+  time_sample_id SERIAL PRIMARY KEY,
+  study_timeframe_id integer REFERENCES study_timeframe,
   name character varying(30) NOT NULL,
   method text,
   description text,
@@ -115,10 +116,10 @@ COMMENT ON TABLE time_sample
 
 CREATE TABLE sampled_timeseries
 (
-  sampled_timeseries_id smallint PRIMARY KEY,
-  study_timeframe_id smallint REFERENCES study_timeframe,
-  time_sample_id smallint REFERENCES time_sample,
-  period_id smallint REFERENCES period,
+  sampled_timeseries_id serial PRIMARY KEY,
+  study_timeframe_id integer REFERENCES study_timeframe,
+  time_sample_id integer REFERENCES time_sample,
+  period_id integer REFERENCES period,
   name character varying(30) NOT NULL,
   hours_per_tp double precision NOT NULL,
   num_timepoints INT NOT NULL,
@@ -139,11 +140,11 @@ COMMENT ON COLUMN sampled_timeseries.scaling_to_period
 
 CREATE TABLE sampled_timepoint
 (
-  raw_timepoint_id integer PRIMARY KEY REFERENCES raw_timepoint,
-  study_timeframe_id smallint REFERENCES study_timeframe,
-  time_sample_id smallint REFERENCES time_sample,
-  sampled_timeseries_id smallint REFERENCES sampled_timeseries,
-  period_id smallint REFERENCES period,
+  raw_timepoint_id integer REFERENCES raw_timepoint,
+  study_timeframe_id integer REFERENCES study_timeframe,
+  time_sample_id integer REFERENCES time_sample,
+  sampled_timeseries_id integer REFERENCES sampled_timeseries,
+  period_id integer REFERENCES period,
   timestamp_utc timestamp without time zone,
   FOREIGN KEY (study_timeframe_id, time_sample_id, sampled_timeseries_id) 
     REFERENCES sampled_timeseries (study_timeframe_id, time_sample_id, sampled_timeseries_id)
@@ -350,7 +351,7 @@ CREATE TABLE generation_plant_existing_and_planned
   generation_plant_id INT NOT NULL REFERENCES generation_plant,
   build_year INT NOT NULL,
   capacity double precision,
-  PRIMARY KEY (generation_plant_id, build_year)
+  PRIMARY KEY (generation_plant_existing_and_planned_scenario_id, generation_plant_id, build_year)
 );
 COMMENT ON TABLE generation_plant_existing_and_planned
   IS 'Describes existing and planned projects according to the year they came online (build_year), and the capacity 
@@ -411,8 +412,8 @@ CREATE TABLE scenario
     scenario_id smallint PRIMARY KEY,
     name character varying(50),
     description text,
-    study_timeframe_id SMALLINT NOT NULL REFERENCES study_timeframe,
-    time_sample_id SMALLINT NOT NULL REFERENCES time_sample,
+    study_timeframe_id INTEGER NOT NULL REFERENCES study_timeframe,
+    time_sample_id INTEGER NOT NULL REFERENCES time_sample,
     demand_scenario_id SMALLINT NOT NULL REFERENCES demand_scenario,
     fuel_simple_price_scenario_id SMALLINT NOT NULL REFERENCES fuel_simple_price_scenario,
     generation_plant_scenario_id SMALLINT NOT NULL REFERENCES generation_plant_scenario,

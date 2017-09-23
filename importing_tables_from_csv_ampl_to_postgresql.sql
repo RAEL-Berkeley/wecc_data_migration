@@ -105,8 +105,7 @@ SELECT timepoint_year - 2010 as raw_timeseries_id,
 	timepoint_year as end_year,
 	NULL as description
 from ampl_study_timepoints 
-where timepoint_year >= 2011 and 
-	timepoint_year <= 2051 
+where timepoint_year >= 2011
 group by timepoint_year
 order by timepoint_year;
 
@@ -115,7 +114,7 @@ select timepoint_id as raw_timepoint_id,
 	timepoint_year - 2010 as raw_timeseries_id, 
 	datetime_utc as timestamp_utc
 from ampl_study_timepoints
-where timepoint_year >= 2011 and timepoint_year <= 2051 
+where timepoint_year >= 2011
 order by raw_timepoint_id;
 
 -- Add 2006 historical timeseries.

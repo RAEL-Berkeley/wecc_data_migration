@@ -1,0 +1,45 @@
+-- Ugh, the 2006 historical raw timepoints have ids that conflict with 2052-2061 timepoints.
+-- Manually update the ids like so (after manual inspection of allowed id range):
+
+ALTER TABLE projection_to_future_timepoint
+drop constraint projection_to_future_timepoint_historical_timepoint_id_fkey;
+
+update raw_timepoint
+set raw_timepoint_id = raw_timepoint_id+70152
+where raw_timeseries_id=2006;
+
+update projection_to_future_timepoint
+set historical_timepoint_id = historical_timepoint_id+70152
+where historical_timepoint_id >= 376920;
+
+ALTER TABLE projection_to_future_timepoint
+ADD  CONSTRAINT projection_to_future_timepoint_historical_timepoint_id_fkey FOREIGN KEY (historical_timepoint_id)
+      REFERENCES raw_timepoint (raw_timepoint_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+-- select *, raw_timepoint_id+70152
+-- from raw_timepoint
+-- where raw_timeseries_id=2006;
+
+-- Insert 2052+ timeseries & timepoints
+insert into raw_timeseries 
+SELECT timepoint_year - 2010 as raw_timeseries_id,
+	1 as hours_per_tp,
+	count(*) as num_timepoints,
+	min(datetime_utc) as first_timepoint_utc,
+	max(datetime_utc) as last_timepoint_utc,
+	timepoint_year as start_year,
+	timepoint_year as end_year,
+	NULL as description
+from ampl_study_timepoints 
+where timepoint_year > 2051
+group by timepoint_year
+order by timepoint_year;
+
+insert into raw_timepoint
+select timepoint_id as raw_timepoint_id, 
+	timepoint_year - 2010 as raw_timeseries_id, 
+	datetime_utc as timestamp_utc
+from ampl_study_timepoints
+where timepoint_year > 2051 
+order by raw_timepoint_id;
