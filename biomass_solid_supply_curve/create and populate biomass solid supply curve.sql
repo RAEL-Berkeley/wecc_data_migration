@@ -128,6 +128,11 @@ from switch.load_zone
 order by 2;
 
 
+-- add new id columns to scenario table ---------------------------------------------------------------
+
+alter table scenario add column supply_curves_scenario_id int;
+alter table scenario add column regional_fuel_market_scenario_id int;
+alter table scenario add column zone_to_regional_fuel_market_scenario_id int;
 
 
 
