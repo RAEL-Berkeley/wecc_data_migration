@@ -35,42 +35,43 @@ primary key (supply_curves_scenario_id,
 drop table if exists public.years_in_supply_curve;
 
 create table public.years_in_supply_curve(
+regional_fuel_market VARCHAR,
 year int,
-primary key(year)
+primary key(regional_fuel_market, year)
 );
 
 
-CREATE FUNCTION make_thing_seq5() RETURNS trigger
+CREATE FUNCTION make_thing_seq6() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 begin
-  execute format('create sequence thing_seq5_%s', NEW.year);
+  execute format('create sequence thing_seq6_%s', concat(NEW.regional_fuel_market, NEW.year));
   return NEW;
 end
 $$;
 
-CREATE TRIGGER make_thing_seq5 AFTER INSERT ON public.years_in_supply_curve 
-FOR EACH ROW EXECUTE PROCEDURE make_thing_seq5();
+CREATE TRIGGER make_thing_seq6 AFTER INSERT ON public.years_in_supply_curve 
+FOR EACH ROW EXECUTE PROCEDURE make_thing_seq6();
 
 insert into public.years_in_supply_curve
-select year from switch.ampl_biomass_solid_supply_curve_v3
-group by year
-order by year;
+select load_area, year from switch.ampl_biomass_solid_supply_curve_v3
+group by load_area, year
+order by load_area, year;
 
 
 
 -- 
-CREATE FUNCTION fill_in_stuff_seq5() RETURNS trigger
+CREATE FUNCTION fill_in_stuff_seq6() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 begin
-  NEW.tier := nextval('thing_seq5_' || NEW.year);
+  NEW.tier := nextval('thing_seq6_' || concat(NEW.regional_fuel_market, NEW.year));
   RETURN NEW;
 end
 $$;
 
-CREATE TRIGGER fill_in_stuff_seq5 BEFORE INSERT ON switch.fuel_supply_curves 
-FOR EACH ROW EXECUTE PROCEDURE fill_in_stuff_seq5();
+CREATE TRIGGER fill_in_stuff_seq6 BEFORE INSERT ON switch.fuel_supply_curves 
+FOR EACH ROW EXECUTE PROCEDURE fill_in_stuff_seq6();
 
 -- end of esoteric functions
 
