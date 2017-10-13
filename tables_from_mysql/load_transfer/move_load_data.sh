@@ -5,9 +5,10 @@
 mysql_db="loads_wecc_ccc3_revised"
 load_scenario_ids="111,112,113,114,115,116,117"
 load_scenario_sql="
-select *,
+select 
 	load_scenario_id as demand_scenario_id, 
-	scenario_name as name
+	'' as name,
+	scenario_name as description
 from CCC3_load_scenario_table
  	join ccc3_load_scenario_mapping USING (CCC3_load_scenario)
 where CCC3_load_scenario in ($load_scenario_ids);

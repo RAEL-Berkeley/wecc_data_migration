@@ -19,7 +19,72 @@ rps_compliance_year as year, rps_compliance_fraction as rps_target
 from switch.ampl_rps_compliance_entity_targets_v2
 where rps_compliance_type='Primary'
 and enable_rps=1
-order by 1, 3;
+order by 1, 2, 3;
+
+-- update to current RPS:
+-- OK: AZ, CO
+-- CA
+
+
+update rps_target set rps_target = 0.33 
+where year = 2020 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.347 
+where year = 2021 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.364
+where year = 2022 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.381 
+where year = 2023 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.398 
+where year = 2024 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.415 
+where year = 2025 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.432 
+where year = 2026 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.449 
+where year = 2027 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.466 
+where year = 2028 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.483 
+where year = 2029 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+update rps_target set rps_target = 0.5
+where year >= 2030 
+and load_zone like 'CA_%' 
+and load_zone not like 'CAN%';
+
+
+
+
+
 
 
 
