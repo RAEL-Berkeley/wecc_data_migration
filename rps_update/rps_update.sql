@@ -1,6 +1,7 @@
 -- RPS update
 
 -- CA 50% by 2030
+set search_path to switch;
 
 drop table if exists rps_target;
 
@@ -20,14 +21,12 @@ from switch.ampl_rps_compliance_entity_targets_v2
 join switch.ampl_load_area_info_v3 USING(rps_compliance_entity)
 where rps_compliance_type='Primary'
 and enable_rps=1
-and rps_compliance_year <=2070
 order by 1, 2;
 
 -- update to current RPS:
--- OK: AZ, CO
--- CA
+-- CA and OREGON
 
-
+-- CALIFORNIA
 update rps_target set rps_target = 0.33 
 where year = 2020 
 and load_zone like 'CA_%' 
@@ -86,41 +85,224 @@ and load_zone not like 'CAN%';
 
 
 
+-- OREGON (OR_E)
+update rps_target set rps_target = 0.271873
+where year = 2026 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.288168
+where year = 2027 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.304462
+where year = 2028 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.320757
+where year = 2029 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.337052
+where year = 2030 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.353347
+where year = 2031 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.369642
+where year = 2032 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.385936
+where year = 2033 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.402231
+where year = 2034 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.418526
+where year = 2035 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.434821
+where year = 2036 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.451116
+where year = 2037 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.467410
+where year = 2038 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.483705
+where year = 2039 
+and load_zone = 'OR_E';
+
+update rps_target set rps_target = 0.500000
+where year >= 2040 
+and load_zone = 'OR_E';
 
 
+-- (OR_PDX)
+update rps_target set rps_target = 0.249856
+where year = 2026 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.267724
+where year = 2027 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.285591
+where year = 2028 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.303459
+where year = 2029 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.321326
+where year = 2030 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.339193
+where year = 2031 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.357061
+where year = 2032 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.374928
+where year = 2033 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.392796
+where year = 2034 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.410663
+where year = 2035 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.428530
+where year = 2036 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.446398
+where year = 2037 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.464265
+where year = 2038 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.482133
+where year = 2039 
+and load_zone = 'OR_PDX';
+
+update rps_target set rps_target = 0.500000
+where year >= 2040 
+and load_zone = 'OR_PDX';
+
+
+
+-- OREGON (OR_E)
+update rps_target set rps_target = 0.271873
+where year = 2026 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.288168
+where year = 2027 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.304462
+where year = 2028 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.320757
+where year = 2029 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.337052
+where year = 2030 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.353347
+where year = 2031 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.369642
+where year = 2032 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.385936
+where year = 2033 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.402231
+where year = 2034 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.418526
+where year = 2035 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.434821
+where year = 2036 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.451116
+where year = 2037 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.467410
+where year = 2038 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.483705
+where year = 2039 
+and load_zone = 'OR_W';
+
+update rps_target set rps_target = 0.500000
+where year >= 2040 
+and load_zone = 'OR_W';
 
 
 
 -- ----- scratch
 
 --from switch_us db
-select * from switch.rps_compliance_entity_targets
-where rps_compliance_type='Primary'
-and rps_requirement_optional='Mandatory'
-order by state, rps_compliance_year;
+--select * from switch.rps_compliance_entity_targets
+--where rps_compliance_type='Primary'
+--and rps_requirement_optional='Mandatory'
+--order by state, rps_compliance_year;
 
 --from switch_wecc db
-select * 
-from switch.ampl_rps_compliance_entity_targets_v2
-where rps_compliance_type='Primary'
-and enable_rps=1
-and rps_compliance_year <=2070
-order by 1, 3;
+--select * 
+--from switch.ampl_rps_compliance_entity_targets_v2
+--where rps_compliance_type='Primary'
+--and enable_rps=1
+--and rps_compliance_year <=2070
+--order by 1, 3;
 
-select rps_compliance_entity, load_zone_id from (
-select * 
-from switch.ampl_rps_compliance_entity_targets_v2
+--select rps_compliance_entity, load_zone_id from (
+--select * 
+--from switch.ampl_rps_compliance_entity_targets_v2
 --JOIN switch.load_zone on(rps_compliance_entity=name)
-where rps_compliance_type='Primary'
-and enable_rps=1
-and rps_compliance_year <=2070
-order by 1, 3
-) as w
-join switch.load_zone on (rps_compliance_entity=name)
-group by 1,2
-order by 2;
+--where rps_compliance_type='Primary'
+--and enable_rps=1
+--and rps_compliance_year <=2070
+--order by 1, 3
+--) as w
+--join switch.load_zone on (rps_compliance_entity=name)
+--group by 1,2
+--order by 2;
 
-select * from switch.load_zone
+--select * from switch.load_zone
 --where name like 'CO_%'
 --and name not like 'CAN%'
-order by 1
+--order by 1
