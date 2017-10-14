@@ -14,12 +14,14 @@ primary key(rps_scenario_id, load_zone, year)
 ;
 
 insert into rps_target
-select 1 as rps_scenario_id, rps_compliance_entity as load_zone,
-rps_compliance_year as year, rps_compliance_fraction as rps_target
+select 1 as rps_scenario_id, load_area as load_zone, rps_compliance_year as year, 
+rps_compliance_fraction as rps_target
 from switch.ampl_rps_compliance_entity_targets_v2
+join switch.ampl_load_area_info_v3 USING(rps_compliance_entity)
 where rps_compliance_type='Primary'
 and enable_rps=1
-order by 1, 2, 3;
+and rps_compliance_year <=2070
+order by 1, 2;
 
 -- update to current RPS:
 -- OK: AZ, CO
@@ -104,3 +106,21 @@ where rps_compliance_type='Primary'
 and enable_rps=1
 and rps_compliance_year <=2070
 order by 1, 3;
+
+select rps_compliance_entity, load_zone_id from (
+select * 
+from switch.ampl_rps_compliance_entity_targets_v2
+--JOIN switch.load_zone on(rps_compliance_entity=name)
+where rps_compliance_type='Primary'
+and enable_rps=1
+and rps_compliance_year <=2070
+order by 1, 3
+) as w
+join switch.load_zone on (rps_compliance_entity=name)
+group by 1,2
+order by 2;
+
+select * from switch.load_zone
+--where name like 'CO_%'
+--and name not like 'CAN%'
+order by 1
