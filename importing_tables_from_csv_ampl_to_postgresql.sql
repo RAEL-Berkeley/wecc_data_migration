@@ -760,15 +760,25 @@ update fuel_simple_price_yearly set fuel_price = 0.5
 where fuel in ('Bio_Gas', 'Bio_Solid', 'Bio_Liquid') 
 and fuel_simple_scenario_id=2;
 
+-- Adding new fuel_simple_scenario_id so it doesn't include Bio_Solid. Bio_Solid is included in 
+-- supply curve.
+insert into fuel_simple_price_yearly
+select 3 as fuel_simple_scenario_id, load_zone_id, load_zone_name, fuel, 
+projection_year, fuel_price, notes, eai_region
+from fuel_simple_price_yearly
+where fuel_simple_scenario_id=2
+and fuel <> 'Bio_Solid'
+;
 
+update fuel_simple_price_yearly set fuel_price = 0.01 
+where fuel in ('Bio_Gas', 'Bio_Solid', 'Bio_Liquid') 
+and fuel_simple_scenario_id=3;
 
 -- fuel_simple_price table skipped here. This table is created in get_switch_input_tables 
 -- by joining fuel_simple_price_yearly with table with period_id
 
 
 
--- [Pending][To-do][Ask Josiah] Decide what to do with biomass prices. Maybe use supply MySQL/AMPL curves?
--- ans: use supply curve
 
 insert into fuel_simple_price_scenario
 select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
@@ -778,6 +788,10 @@ select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name,
 insert into fuel_simple_price_scenario
 select 2 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
 'Fuel prices from SWITCH AMPL. Not Biomass, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
+
+insert into fuel_simple_price_scenario
+select 3 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
+'Fuel prices from SWITCH AMPL. Bio_Solid in supply curve, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
 
 
 
@@ -875,7 +889,7 @@ join generation_plant_existing_and_planned on(generation_plant_id = project_id);
 
 
 ---------------------------------------------------------------------------
--- [Pending] Policies: RPS and Carbon Cap
+-- Policies: RPS and Carbon Cap
 ---------------------------------------------------------------------------
 
 -- RPS:
@@ -893,7 +907,7 @@ COPY ampl_rps_compliance_entity_targets_v2
 FROM '/var/tmp/home_pehidalg/tables_from_mysql/ampl_rps_compliance_entity_targets_v2.csv'  
 DELIMITER ',' NULL AS 'NULL' CSV HEADER;
 
--- Pending: create table and write python code in switch to have RPS per load_zone
+-- RPS done in a separate folder in this same repo.
 
 
 -- Carbon Cap:
@@ -1040,3 +1054,63 @@ values (7,
 		5, -- hydro_simple_scenario_id
 		35 -- carbon_cap_scenario_id
 		); 
+
+-- [CCC3] FOR CEC study
+insert into scenario
+values (12, 
+		'[CCC3] Determin. CanESM2 RPC8.5, agg eff w elec', 
+		'Aggressive with electrif, CanESM2, RCP8.5, updated gen listings (env cat 2), timepoints from AMPL 1112, load_id=119, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		119, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario
+		11, -- generation_plant_scenario_id
+		5, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		6, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		); 
+		
+-- [CCC3] FOR CEC study
+insert into scenario
+values (13, 
+		'[CCC3] Determin. HadGEM2ES RPC8.5, agg eff w elec', 
+		'Aggressive with electrif, HadGEM2ES, RCP8.5, updated gen listings (env cat 2), timepoints from AMPL 1112, load_id=121, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		121, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario
+		11, -- generation_plant_scenario_id
+		5, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		7, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		); 		
+		
+-- [CCC3] FOR CEC study
+insert into scenario
+values (14, 
+		'[CCC3] Determin. MIROC5 RPC8.5, agg eff w elec', 
+		'Aggressive with electrif, MIROC5, RCP8.5, updated gen listings (env cat 2), timepoints from AMPL 1112, load_id=121, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		123, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario
+		11, -- generation_plant_scenario_id
+		5, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		8, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);		
