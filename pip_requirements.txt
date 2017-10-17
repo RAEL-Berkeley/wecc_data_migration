@@ -1,4 +1,3 @@
 pandas
 pgpasslib
 psycopg2
-sshtunnel

@@ -34,7 +34,8 @@ import tempfile
 
 # 3rd party libraries
 import pgpasslib
-from sqlalchemy import create_engine
+import psycopg2
+
 
 # Global variables (in this module) that store database connection info.
 # These need to be cleaned up when the program exists.
@@ -114,12 +115,11 @@ def connect(args):
             raise Exception('SSH tunnel failed with status: {}'.format(exit_status))
         host='127.0.0.1'
         port=local_port
-    engine = create_engine(
-        'postgresql://{user}:{passw}@{host}:{port}/{db_name}'.format(
-            user=args.db_user,
-            passw=passw,
-            host=host,
-            port=port,
-            db_name=args.database ))
-    db_connection = engine.connect()
+    db_connection = psycopg2.connect(
+        dbname=args.database,
+        user=args.db_user,
+        password=passw,
+        host=host,
+        port=port
+    )
     return db_connection

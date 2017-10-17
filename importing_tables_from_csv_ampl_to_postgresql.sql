@@ -445,6 +445,14 @@ from ampl_generator_costs_yearly_v3
 join generation_plant t on (gen_tech=technology)
 where gen_costs_scenario_id = 10;
 
+-- Add vintage costs for existing plants too.
+INSERT INTO generation_plant_cost
+SELECT 1 AS generation_plant_cost_scenario_id, 
+    project_id AS generation_plant_id, 
+    start_year AS build_year, 
+    fixed_o_m, overnight_cost
+FROM ampl_existing_plants_v3;
+
 
 ---------------------------------------------------------------------------
 -- Generation plant existing and planned

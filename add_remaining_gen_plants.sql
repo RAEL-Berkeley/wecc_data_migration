@@ -81,8 +81,129 @@ where gen_costs_scenario_id = 10
     AND generation_plant_scenario_id = 6;
 
 
--- * Insert renewable capacity factors hourly timeseries
--- Uh, the importin'g_tables_from_cvs_ampl... was messy on the variable cap factor part. Maybe ask Paty to do that? Or... pull the raw table from ampl and fill in the blanks.
+-- * Insert renewable capacity factors hourly timeseries. 
 
--- * Insert geolocations # To Do..
--- Other script: Create new gen plant scenario based on Grace's allowed land maps
+-- Copy from Paty's 
+-- temp_variable_capacity_factors_historical_csp and temp_variable_capacity_factors_historical
+-- tables which are used directly by the get_inputs.py script
+-- To Do: Update get_inputs.py script to use variable_capacity_factors.
+
+-- Start with just copying historical cap factors. Projecting them to every future year in the variable_capacity_factors table bloats the tables too much and slows down postgresql to a crawl on inserts. 
+
+INSERT INTO variable_capacity_factors_historical
+    (generation_plant_id, raw_timepoint_id, timestamp_utc, capacity_factor)
+SELECT project_id AS generation_plant_id, raw_timepoint_id,
+    ampl_historic_hours.datetime_utc, cap_factor  
+FROM temp_variable_capacity_factors_historical
+    JOIN ampl_historic_hours ON(hournum=hour)
+    JOIN raw_timepoint ON(datetime_utc=timestamp_utc);
+
+DELETE FROM variable_capacity_factors_historical
+    WHERE generation_plant_id IN (SELECT DISTINCT project_id FROM temp_variable_capacity_factors_historical_csp);
+
+INSERT INTO variable_capacity_factors_historical
+    (generation_plant_id, raw_timepoint_id, timestamp_utc, capacity_factor)
+SELECT project_id AS generation_plant_id, raw_timepoint_id,
+    ampl_historic_hours.datetime_utc, cap_factor_adjusted  
+FROM temp_variable_capacity_factors_historical_csp
+    JOIN ampl_historic_hours ON(hournum=hour)
+    JOIN raw_timepoint ON(datetime_utc=timestamp_utc);
+
+INSERT INTO switch.variable_capacity_factors_historical(
+           generation_plant_id, raw_timepoint_id, timestamp_utc, capacity_factor)
+SELECT generation_plant_id, raw_timepoint.raw_timepoint_id, vcf.timestamp_utc - interval '5 years', capacity_factor
+FROM variable_capacity_factors vcf
+	JOIN raw_timepoint ON(vcf.timestamp_utc - interval '5 years' = raw_timepoint.timestamp_utc)
+WHERE vcf.raw_timepoint_id >= 8761 AND vcf.raw_timepoint_id <= 17519
+ORDER BY 1, 2
+;
+
+-- Try inserting to variable_capacity_factors.. These inserts run forever without finishing, so I haven't finished these queries yet. Dropping the primary key before insert then recreating after should speed things up. Another tip is using a COPY instead of INSERT.
+
+
+ALTER TABLE switch.variable_capacity_factors
+    DROP CONSTRAINT variable_capacity_factors_generation_plant_id_fkey,
+    DROP CONSTRAINT variable_capacity_factors_raw_timepoint_id_fkey,
+    DROP CONSTRAINT variable_capacity_factors_raw_timepoint_id_fkey1
+;
+
+﻿CREATE TABLE tmp.copy_from_temp_variable_capacity_factors_historical AS
+SELECT DISTINCT(generation_plant_id)
+FROM switch.generation_plant
+	JOIN temp_variable_capacity_factors_historical ON (generation_plant_id=project_id)
+WHERE is_variable
+	AND generation_plant_id not in (SELECT generation_plant_id FROM tmp.gen_with_var_cap_factors)
+;
+ALTER TABLE tmp.copy_from_temp_variable_capacity_factors_historical
+    ADD PRIMARY KEY(generation_plant_id);
+INSERT INTO switch.variable_capacity_factors(
+            generation_plant_id, raw_timepoint_id, timestamp_utc, capacity_factor)
+SELECT project_id AS generation_plant_id, timepoint_id as raw_timepoint_id,
+    datetime_utc, cap_factor  
+FROM temp_ampl_study_timepoints 
+    JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
+    JOIN temp_variable_capacity_factors_historical ON(historic_hour=hour)
+    JOIN tmp.copy_from_temp_variable_capacity_factors_historical ON(project_id = generation_plant_id)
+;
+DROP TABLE tmp.copy_from_temp_variable_capacity_factors_historical;
+
+-- CSP cap factors
+﻿CREATE TABLE tmp.copy_from_temp_variable_capacity_factors_historical_csp AS
+SELECT DISTINCT(generation_plant_id)
+FROM switch.generation_plant
+	JOIN temp_variable_capacity_factors_historical ON (generation_plant_id=project_id)
+WHERE is_variable
+	AND generation_plant_id not in (SELECT generation_plant_id FROM tmp.gen_with_var_cap_factors)
+;
+ALTER TABLE tmp.copy_from_temp_variable_capacity_factors_historical_csp
+    ADD PRIMARY KEY(generation_plant_id);
+
+INSERT INTO switch.variable_capacity_factors( ﻿generation_plant_id, raw_timepoint_id, timestamp_utc, capacity_factor)
+SELECT project_id AS generation_plant_id, timepoint_id as raw_timepoint_id,
+    datetime_utc, cap_factor_adjusted AS cap_factor  
+FROM temp_ampl_study_timepoints 
+    JOIN temp_load_scenario_historic_timepoints USING(timepoint_id)
+    JOIN temp_variable_capacity_factors_historical_csp ON(historic_hour=hour)
+    JOIN tmp.copy_from_temp_variable_capacity_factors_historical_csp ON(project_id = generation_plant_id)
+;
+DROP TABLE tmp.copy_from_temp_variable_capacity_factors_historical_csp;
+
+ALTER TABLE switch.variable_capacity_factors
+    ADD CONSTRAINT variable_capacity_factors_generation_plant_id_fkey FOREIGN KEY (generation_plant_id)
+      REFERENCES switch.generation_plant (generation_plant_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+    ADD CONSTRAINT variable_capacity_factors_raw_timepoint_id_fkey FOREIGN KEY (raw_timepoint_id)
+      REFERENCES switch.raw_timepoint (raw_timepoint_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+    ADD CONSTRAINT variable_capacity_factors_raw_timepoint_id_fkey1 FOREIGN KEY (raw_timepoint_id, timestamp_utc)
+      REFERENCES switch.raw_timepoint (raw_timepoint_id, timestamp_utc) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+;
+
+-- * Insert geolocations
+-- Test query...
+SELECT *, ST_Centroid(proposed_projects_from_backup.the_geom),
+    proposed_projects_from_backup.substation_connection_geom,
+    proposed_projects_from_backup.the_geom
+FROM switch.generation_plant, switch.ampl__proposed_projects_v3, public.proposed_projects_from_backup
+WHERE ampl__proposed_projects_v3.project_id = generation_plant.generation_plant_id
+    AND proposed_projects_from_backup.project_id = ampl__proposed_projects_v3.gen_info_project_id
+    AND generation_plant.geom is null
+;
+
+-- Copy spatial data into the generation_plant table. 
+-- Only write if the geom column is empty to avoid any overwrites..
+UPDATE switch.generation_plant
+SET geom = ST_Centroid(proposed_projects_from_backup.the_geom),
+    substation_connection_geom = proposed_projects_from_backup.substation_connection_geom,
+    geom_area = proposed_projects_from_backup.the_geom
+FROM switch.ampl__proposed_projects_v3, public.proposed_projects_from_backup
+WHERE ampl__proposed_projects_v3.project_id = generation_plant.generation_plant_id
+    AND proposed_projects_from_backup.project_id = ampl__proposed_projects_v3.gen_info_project_id
+    AND generation_plant.geom is null
+;
+
+-- Ensure variable renewable projects do not have zero for heat rate, but instead have NULLs.
+UPDATE switch.generation_plant
+SET full_load_heat_rate = NULL
+WHERE is_variable AND full_load_heat_rate = 0;

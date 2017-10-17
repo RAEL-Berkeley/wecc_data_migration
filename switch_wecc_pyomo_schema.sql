@@ -58,6 +58,8 @@ CREATE TABLE projection_to_future_timepoint
 );
 COMMENT ON TABLE projection_to_future_timepoint
   IS 'For now, we use a single projection method per database, so we do not include a projection_scenario_id column in this table.';
+CREATE INDEX ON projection_to_future_timepoint (future_timepoint_id);
+CREATE INDEX ON projection_to_future_timepoint (historical_timepoint_id);
 
 CREATE TABLE study_timeframe
 (
@@ -152,6 +154,8 @@ CREATE TABLE sampled_timepoint
 COMMENT ON TABLE sampled_timepoint
   IS 'A set of sampled timepoints, organized into timeseries. Redundant index columns are intentional to allow 
   faster queries.';
+CREATE INDEX ON sampled_timepoint (time_sample_id);
+
 
 -----------------------------
 -- Load zones
@@ -204,6 +208,7 @@ COMMENT ON TABLE demand_timeseries
   IS 'Hourly demands in MW per load zone. Contains different demand scenarios. Note, the load_zone_name and 
   timestamp_utc are redundant with data in load_zone and raw_timepoint, and are provided for convenience. 
   The foreign key checks ensure these redundant data values match the data in their primary tables.';
+CREATE INDEX ON demand_timeseries (demand_scenario_id, raw_timepoint_id);
 
 -----------------------------
 -- Transmission
@@ -332,6 +337,29 @@ CREATE TABLE generation_plant_scenario_member
   PRIMARY KEY(generation_plant_scenario_id, generation_plant_id)
 );
 
+CREATE TABLE generation_plant_cap_limit_scenario
+(
+  generation_plant_cap_limit_scenario_id INTEGER PRIMARY KEY,
+  name text,
+  description text
+);
+COMMENT ON TABLE generation_plant_cap_limit_scenario
+  IS 'Defines which set of capacity limits for generation plants to include in a particular SWITCH optimization. Use this to enable/disable projects, aggregate projects for faster planning simulations without unit commitment, etc.';
+INSERT INTO generation_plant_cap_limit_scenario (
+    generation_plant_cap_limit_scenario_id, name, description)
+VALUES 
+    (1, 'AMPL cap limits', ''),
+    (2, 'CA env wind cap cat 2, otherwise AMPL cap limits.', 'Good with generation_plant_scenario_id 12'),
+    (3, 'CA env wind cap cat 3, otherwise AMPL cap limits.', 'Good with generation_plant_scenario_id 13');
+
+CREATE TABLE generation_plant_cap_limit
+(
+  generation_plant_cap_limit_scenario_id INTEGER NOT NULL REFERENCES generation_plant_cap_limit_scenario,
+  generation_plant_id INT NOT NULL REFERENCES generation_plant,
+  capacity_limit_mw double precision,
+  PRIMARY KEY(generation_plant_cap_limit_scenario_id, generation_plant_id)
+);
+
 CREATE TABLE generation_plant_cost_scenario
 (
   generation_plant_cost_scenario_id SMALLINT PRIMARY KEY,
@@ -379,19 +407,26 @@ CREATE TABLE variable_capacity_factors
   raw_timepoint_id int NOT NULL REFERENCES raw_timepoint,
   timestamp_utc timestamp without time zone NOT NULL,
   capacity_factor double precision,
-  PRIMARY KEY (generation_plant_id, raw_timepoint_id),
-  FOREIGN KEY (raw_timepoint_id, timestamp_utc )
-      REFERENCES raw_timepoint (raw_timepoint_id, timestamp_utc)
+  PRIMARY KEY (generation_plant_id, raw_timepoint_id)
 );
 COMMENT ON TABLE variable_capacity_factors
   IS 'This contains historical time series of hourly capacity factors for variable renewable generators (wind, solar, etc).
    Multiplying these hourly capacity factors by the installed capacity will produce the hourly power output. This table 
    should store the historical data for one or more reference years. These values will be projected to future years when 
    a scenario is exported to SWITCH-pyomo input files.';
-COMMENT ON COLUMN variable_capacity_factors.timestamp_utc IS 'This timestamp should be recorded in UTC. For regions that 
-only span one time zone, this is less important. This should never contain daylight savings time because a time series 
-specified in daylight savings time will drop one hour per year.';
+COMMENT ON COLUMN variable_capacity_factors.timestamp_utc IS 'This timestamp column is for convenience and needs to match the data in the raw_timepoint table.';
 
+CREATE TABLE variable_capacity_factors_historical
+(
+  generation_plant_id INT NOT NULL REFERENCES generation_plant,
+  raw_timepoint_id int NOT NULL REFERENCES raw_timepoint,
+  timestamp_utc timestamp without time zone NOT NULL,
+  capacity_factor double precision,
+  PRIMARY KEY (generation_plant_id, raw_timepoint_id)
+);
+COMMENT ON TABLE variable_capacity_factors_historical
+  IS 'Like variable_capacity_factors, but historical data only; no future projections';
+CREATE INDEX ON variable_capacity_factors_historical (raw_timepoint_id);
 
 CREATE TABLE hydro_simple_scenario
 (
