@@ -453,6 +453,163 @@ SELECT 1 AS generation_plant_cost_scenario_id,
     fixed_o_m, overnight_cost
 FROM ampl_existing_plants_v3;
 
+-- Storage storage_energy_capacity_cost_per_mwh
+-- I did not realize I was missing this parameter... whoops!
+-- So now I'll incorporate it to all projects (existing, proposed and possible)
+
+-- Typical values for storage_energy_capacity_cost_per_mwh
+-- standard deviation is zero, therefore I can use one value per (year, gen_tech)
+--select year, gen_tech, avg(storage_energy_capacity_cost_per_mwh), stddev(storage_energy_capacity_cost_per_mwh)
+--from ampl_generator_costs_yearly_v3 
+--join generation_plant t on (gen_tech=technology)
+--where gen_costs_scenario_id = 10
+--group by 1, 2
+--order by 2, 1;
+
+drop table switch.storage_energy_capacity_cost_per_mwh;
+create table if not exists switch.storage_energy_capacity_cost_per_mwh(
+scenario_id int,
+year int,
+gen_tech varchar,
+storage_energy_capacity_cost_per_mwh double precision,
+primary key (scenario_id, year, gen_tech)
+);
+
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, gen_tech, 
+avg(storage_energy_capacity_cost_per_mwh) as storage_energy_capacity_cost_per_mwh
+from ampl_generator_costs_yearly_v3 
+join generation_plant t on (gen_tech=technology)
+where gen_costs_scenario_id = 10
+group by 1, 2, 3
+order by 1, 3, 2;
+
+-- Adding data for new storage technologies that don't have values (because of a change in name)
+-- Storage gen_tech: Battery_Storage = BA, Compressed_Air_Energy_Storage = CE
+
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'BA' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Battery_Storage';
+
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'CE' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Compressed_Air_Energy_Storage';
+
+
+-- Method to insert zeros in non-storage technologies, so the JOIN in get_inputs works.
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'BT' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'CP' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'DistillateFuelOil_Combustion_Turbine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'DistillateFuelOil_Internal_Combustion_Engine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Gas_Internal_Combustion_Engine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Gas_Steam_Turbine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'GT' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'HY' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Hydro_NonPumped' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Hydro_Pumped' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'IC' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'OT' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'PS' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'PV' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'ST' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'WT' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Bio_Gas_Internal_Combustion_Engine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Bio_Gas_Steam_Turbine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'Bio_Solid_Steam_Turbine' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+insert into switch.storage_energy_capacity_cost_per_mwh
+select 1 as scenario_id,  year, 'CC' as gen_tech, storage_energy_capacity_cost_per_mwh
+from switch.storage_energy_capacity_cost_per_mwh
+where gen_tech='Bio_Gas';
+
+
+
+-- populating data previous to 2010 (with the 2010 values)
+DO
+$do$
+BEGIN
+FOR i IN 1700..2009 LOOP
+	insert INTO switch.storage_energy_capacity_cost_per_mwh
+	select scenario_id, i as year, gen_tech, storage_energy_capacity_cost_per_mwh 
+	from switch.storage_energy_capacity_cost_per_mwh
+	where year = 2010;
+END LOOP;
+END
+$do$;
+
+
+
+
+-- Storage gen_tech: Battery_Storage = BA, Compressed_Air_Energy_Storage = CE
+
+
+
+--ALTER TABLE switch.generation_plant_cost ADD COLUMN storage_energy_capacity_cost_per_mwh DOUBLE PRECISION;
+
+--UPDATE switch.generation_plant_cost SET storage_energy_capacity_cost_per_mwh = 
+--(SELECT storage_energy_capacity_cost_per_mwh
+--FROM switch.storage_energy_capacity_cost_per_mwh WHERE gen_tech='Battery_Storage' and year=2010)
+--WHERE 
+
+
 
 ---------------------------------------------------------------------------
 -- Generation plant existing and planned
@@ -1122,3 +1279,8 @@ values (14,
 		1, -- zone_to_regional_fuel_market_scenario_id
 		1 -- rps_scenario_id
 		);		
+
+update switch.scenario set supply_curves_scenario_id = 1 where scenario_id = 17;
+update switch.scenario set regional_fuel_market_scenario_id = 1 where scenario_id = 17;
+update switch.scenario set zone_to_regional_fuel_market_scenario_id = 1 where scenario_id = 17;
+update switch.scenario set rps_scenario_id = 1 where scenario_id = 17;
