@@ -1284,3 +1284,43 @@ update switch.scenario set supply_curves_scenario_id = 1 where scenario_id = 17;
 update switch.scenario set regional_fuel_market_scenario_id = 1 where scenario_id = 17;
 update switch.scenario set zone_to_regional_fuel_market_scenario_id = 1 where scenario_id = 17;
 update switch.scenario set rps_scenario_id = 1 where scenario_id = 17;
+
+-- Toy to test RPS, carbon cap, storage, Bio_Solid supply curve.
+insert into scenario
+values (19, 
+		'Base AMPL toy env2: RPS, Bio_Solid supply, storage ', 
+		'updated gen listings (env cat 2), load_id=21, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		2, -- study_timeframe_id
+		2, -- time_sample_id
+		21, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario
+		13, -- generation_plant_scenario_id
+		5, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		1, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);	
+		
+-- Toy to test RPS, carbon cap, storage, Bio_Solid supply curve.
+insert into scenario
+values (20, 
+		'Base AMPL full env2: RPS, Bio_Solid supply, storage ', 
+		'updated gen listings (env cat 2), load_id=21, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		21, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		13, -- generation_plant_scenario_id
+		5, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		1, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
