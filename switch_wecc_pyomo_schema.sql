@@ -374,9 +374,9 @@ CREATE TABLE generation_plant_cost
   build_year INT NOT NULL,
   fixed_o_m double precision,
   overnight_cost double precision,
+  storage_energy_capacity_cost_per_mwh double precision DEFAULT NULL,
   PRIMARY KEY (generation_plant_cost_scenario_id, generation_plant_id, build_year)
 );
-
 
 CREATE TABLE generation_plant_existing_and_planned_scenario
 (
