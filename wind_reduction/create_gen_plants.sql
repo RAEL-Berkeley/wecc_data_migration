@@ -71,7 +71,7 @@ INSERT INTO generation_plant (
         -- duplicates, so use min(load_zone_id) to make postgresql happy.
         min(rz_cat2_to_lz.load_zone_id), 
         round(sum(connect_cost_per_mw / (nn_subset.dist_km + 0.01)) / sum(1/(nn_subset.dist_km + 0.01))) as connect_cost_per_mw, 
-        round(sum(genarea_wi) * 6.1) AS capacity_limit_mw,
+        round(rz_cat2.genarea_wi * 6.1) AS capacity_limit_mw,
         0 as variable_o_m, 
         0.05 as forced_outage_rate, 
         0.006 as scheduled_outage_rate, 
@@ -241,7 +241,7 @@ INSERT INTO generation_plant (
         -- duplicates, so use min(load_zone_id) to make postgresql happy.
         min(rz_cat3_to_lz.load_zone_id), 
         round(sum(connect_cost_per_mw / (nn_subset.dist_km + 0.01)) / sum(1/(nn_subset.dist_km + 0.01))) as connect_cost_per_mw, 
-        round(sum(genarea_wi) * 6.1) AS capacity_limit_mw,
+        round(rz_cat3.genarea_wi * 6.1) AS capacity_limit_mw,
         0 as variable_o_m, 
         0.05 as forced_outage_rate, 
         0.006 as scheduled_outage_rate, 

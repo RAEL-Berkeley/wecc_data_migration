@@ -610,6 +610,11 @@ $do$;
 --WHERE 
 
 
+-- Scrub out projected future costs for existing plants.
+DELETE FROM generation_plant_cost
+WHERE generation_plant_cost_scenario_id = 1
+    AND generation_plant_id IN (SELECT project_id FROM ampl_existing_plants_v3)
+    AND build_year != (SELECT start_year FROM ampl_existing_plants_v3 WHERE project_id = generation_plant_id);
 
 ---------------------------------------------------------------------------
 -- Generation plant existing and planned

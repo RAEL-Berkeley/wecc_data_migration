@@ -1,3 +1,4 @@
+-- THIS APPROACH DIDN'T WORK
 -- Try to update the catalog of wind plants based on geographic overlap with
 -- Grace's environmental exclusion datasets (which are specified as areas where
 -- renewables are allowed). This approach proved to be ineffective due to the
@@ -25,7 +26,7 @@ select switch.generation_plant.gen_tech, 'N/A' as category,
 	count(*) AS num_plants
 from switch.generation_plant
 	JOIN switch.load_zone USING (load_zone_id)
-WHERE load_zone.name like 'CA_%'
+WHERE load_zone.name like 'CA\_%'
 group by 1, 2
 UNION
 select switch.generation_plant.gen_tech, category, 
@@ -35,7 +36,7 @@ from public.renewable_energy_inclusion_zones,
 	JOIN switch.load_zone USING (load_zone_id)
 where ST_Intersects(generation_plant.geom_area, renewable_energy_inclusion_zones.geom)
     AND category = '2'
-	AND load_zone.name like 'CA_%'
+	AND load_zone.name like 'CA\_%'
 group by 1, 2
 UNION
 select switch.generation_plant.gen_tech, category, 
@@ -45,7 +46,7 @@ from public.renewable_energy_inclusion_zones,
 	JOIN switch.load_zone USING (load_zone_id)
 where ST_Intersects(generation_plant.geom_area, renewable_energy_inclusion_zones.geom)
     AND category = '3'
-	AND load_zone.name like 'CA_%'
+	AND load_zone.name like 'CA\_%'
 group by 1, 2
 UNION SELECT 'Wind', '2 report', 18740, NULL
 UNION SELECT 'Wind', '3 report', 9531, NULL
