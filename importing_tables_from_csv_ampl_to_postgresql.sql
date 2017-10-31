@@ -793,6 +793,8 @@ from fuel_simple_price_yearly
 where fuel_simple_scenario_id=2
 and fuel <> 'Bio_Solid'
 ;
+delete from fuel_simple_price_yearly where fuel_simple_scenario_id=3 and fuel = 'Bio_Gas'
+
 
 update fuel_simple_price_yearly set fuel_price = 0.01 
 where fuel in ('Bio_Gas', 'Bio_Solid', 'Bio_Liquid') 
@@ -805,18 +807,20 @@ and fuel_simple_scenario_id=3;
 
 
 insert into fuel_simple_price_scenario
-select 1 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
+select 1 as fuel_simple_price_scenario_id, 'Basecase from SWITCH AMPL' as name, 
 'Fuel prices from SWITCH AMPL. Not Biomass. EIA energy outlook 2017 for Gas(_CCS), Coal(_CCS), DistillateFuelOil(_CCS), ResidualFuelOil(_CCS), and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
 
 
 insert into fuel_simple_price_scenario
-select 2 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
+select 2 as fuel_simple_price_scenario_id, 'Basecase from SWITCH AMPL' as name, 
 'Fuel prices from SWITCH AMPL. Not Biomass, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
 
 insert into fuel_simple_price_scenario
-select 3 as fuel_simple_scenario_id, 'Basecase from SWITCH AMPL' as name, 
-'Fuel prices from SWITCH AMPL. Bio_Solid in supply curve, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
+select 3 as fuel_simple_price_scenario_id, 'Basecase from SWITCH AMPL' as name, 
+'Fuel prices from SWITCH AMPL. Bio_Solid and Bio_Gas in supply curve, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' as description; 
 
+update switch.fuel_simple_price_scenario set description='Fuel prices from SWITCH AMPL. Bio_Solid and Bio_Gas in supply curve, no CCS. EIA energy outlook 2017 for Gas, Coal, DistillateFuelOil, ResidualFuelOil, and Uranium. The price for the other fuels are from old data from _fuel_prices table (schema switch_inputs_wecc_v2_2) in mySQL' 
+where fuel_simple_price_scenario_id=3;
 
 
 -- Supply curve for biomass:
