@@ -1187,3 +1187,64 @@ values (20,
 		1, -- zone_to_regional_fuel_market_scenario_id
 		1 -- rps_scenario_id
 		);
+		
+		
+		
+insert into scenario
+values (21, 
+		'Base AMPL full env2: overnight_cost (E3 4% decr)', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 2), load_id=21, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		21, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		13, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		1, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+		
+insert into scenario
+values (22, 
+		'Base AMPL full env2: overnight_cost (E3 1% decr)', 
+		'Updated overnight_cost (E3 1% decr), updated gen listings (env cat 2), load_id=21, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		21, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		13, -- generation_plant_scenario_id
+		7, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		1, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (23, 
+		'Base AMPL full env2: overnight_cost (E3 2014-16)', 
+		'Updated overnight_cost (E3 2014-2016), updated gen listings (env cat 2), load_id=21, 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and carbon cap',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		21, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		13, -- generation_plant_scenario_id
+		8, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		1, -- hydro_simple_scenario_id
+		35, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+select * from scenario;

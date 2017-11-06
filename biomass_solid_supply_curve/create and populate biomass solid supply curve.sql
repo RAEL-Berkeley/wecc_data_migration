@@ -136,6 +136,54 @@ alter table scenario add column regional_fuel_market_scenario_id int;
 alter table scenario add column zone_to_regional_fuel_market_scenario_id int;
 
 
+----------------------------------------------------------------------------------------------------
+-- CREATING SUPPLY CURVE FOR BIO_GAS! 
+
+----------------------------------------------------------------------------------------------------
+
+
+set search_path to switch;
+
+
+--drop table if exists switch.fuel_supply_curves;
+
+--create table if not exists switch.fuel_supply_curves(
+--supply_curves_scenario_id int,
+--regional_fuel_market varchar,
+--fuel varchar,
+--year int,
+--tier int,
+--unit_cost double precision,
+--max_avail_at_cost double precision,
+--notes text,
+--primary key (supply_curves_scenario_id, 
+--			regional_fuel_market,
+--			fuel,
+--			year,
+--			tier)
+--);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
