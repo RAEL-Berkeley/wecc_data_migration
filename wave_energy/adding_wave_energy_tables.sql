@@ -31,3 +31,26 @@ select 9 as generation_plant_cost_scenario_id, t."GENERATION_PROJECT" as generat
 build_year, gen_fixed_om as fixed_o_m, gen_overnight_cost as  overnight_cost, 
 NULL as storage_energy_capacity_cost_per_mwh
 from public.gen_build_costs_wave as t;
+
+
+insert into generation_plant_scenario
+values (15, 'Basecase v0.2.3, wave energy, env_cat3 wind: AMPL proposed non-wind plants (only the best of solar), 2015 Existing Plants Agg update, Env Screen Wind Cat 3')
+;
+
+insert into generation_plant_scenario_member
+select 15 as generation_plant_scenario_id, t1."GENERATION_PROJECT" as generation_plant_id
+from public.generation_projects_info_wave as t1
+union 
+select 15 as generation_plant_scenario_id, generation_plant_id
+from generation_plant_scenario_member
+where generation_plant_scenario_id=14;
+
+
+insert into variable_capacity_factors_historical
+select t."GENERATION_PROJECT" as generation_plant_id, raw_timepoint_id, timestamp_utc, 
+gen_max_capacity_factor as capacity_factor
+from public.variable_capacity_factors_wave as t
+join variable_capacity_factors_historical on (timestamp=to_char(timestamp_utc, 'YYYY-MM-DD HH24:MI:SS'))
+where generation_plant_id=1100165 -- random plant_id chosen to match raw_timepoint_id
+order by 1, 2;
+
