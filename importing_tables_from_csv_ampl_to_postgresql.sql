@@ -987,7 +987,144 @@ carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_
 from ampl_carbon_cap_targets
 ;
 
+-- another carbon cap scenario
+insert into carbon_cap
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and (year <= 2029 or year >= 2050)
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 20*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2030 
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 19*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2031
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 18*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2032
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 17*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2033
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 16*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2034
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 15*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2035
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 14*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2036
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 13*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2037  
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 12*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2038
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 11*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2039
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 10*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2040
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 9*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2041         
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 8*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2042
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 7*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2043
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 6*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2044
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 5*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2045
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 4*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2046
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 3*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2047
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 2*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2048
+union
+select 87 as carbon_cap_scenario_id, '[CEC] 15% by 2050 minus 20 mton/yr from industry' carbon_cap_scenario_name, year, 
+carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) - 1*1000000 as carbon_cap_tco2_per_yr
+from ampl_carbon_cap_targets
+where carbon_cap_scenario_id = 35
+and year = 2049               
+order by year
+;
 
+
+---------------------------------------------------------------------------
+-- EV and DR 
+---------------------------------------------------------------------------
+alter table scenario add column enable_dr int;
+alter table scenario add column enable_ev int;
+
+select * from scenario;
 
 
 ---------------------------------------------------------------------------
@@ -1496,6 +1633,204 @@ values (36,
 		1, -- zone_to_regional_fuel_market_scenario_id
 		1 -- rps_scenario_id
 		);
+
+-- Scenarios with carbon cap (15% by 2050) minus 20 mton/yr from industry -----------------------------------
+
+insert into scenario
+values (43, 
+		'[CCC3] Frozen, cat3, new carbon cap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		111, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (44, 
+		'[CCC3] Interm eff no elect, cat3, new carbon cap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		112, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (45, 
+		'[CCC3] Interm eff + elect, cat3, new carbon cap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		113, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (46, 
+		'[CCC3] Agg eff no elect, cat3, new carbon cap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		114, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (47, 
+		'[CCC3] Agg eff + elect, cat3, new carbon cap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		115, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+-- EV+DR scenarios
+insert into scenario
+values (48, 
+		'[CCC3] EV+DR Agg eff no elect, cat3,newcarboncap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		116, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (49, 
+		'[CCC3] EV+DR Agg eff + elect, cat3,newcarboncap', 
+		'Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		117, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+		
+		
+-- WITH CLIMATE CHANGE CanESM2. Scenarios with carbon cap (15% by 2050) minus 20 mton/yr from industry -----------------------------------
+-- Load and hydro under climate change.
+
+insert into scenario
+values (50, 
+		'[CCC3] CanESM2 RCP8.5, cat3, agg eff w elec', 
+		'Loads and hydro under CC. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		119, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		12, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (51, 
+		'[CCC3] HadGEM2ES RCP8.5, cat3, agg eff w elec', 
+		'Loads and hydro under CC. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		121, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		13, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (52, 
+		'[CCC3] MIROC5 RCP8.5, cat3, agg eff w elec', 
+		'Loads and hydro under CC. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		123, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		14, -- hydro_simple_scenario_id
+		87, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
 
 
 
