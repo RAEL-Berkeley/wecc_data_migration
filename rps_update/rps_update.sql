@@ -306,3 +306,129 @@ and load_zone = 'OR_W';
 --where name like 'CO_%'
 --and name not like 'CAN%'
 --order by 1
+
+
+-- New RPS scenario (50% by 2030 to 100% by 2050 for all load zones) -------------------------------
+
+
+insert into rps_target
+select 2 as rps_scenario_id, load_zone, year, rps_target
+from rps_target
+where rps_scenario_id=1
+and year < 2030
+union
+select 2 as rps_scenario_id, load_zone, year, 0.5 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2030
+union
+select 2 as rps_scenario_id, load_zone, year, 0.525 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2031
+union
+select 2 as rps_scenario_id, load_zone, year, 0.55 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2032
+union
+select 2 as rps_scenario_id, load_zone, year, 0.575 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2033
+union
+select 2 as rps_scenario_id, load_zone, year, 0.6 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2034
+union
+select 2 as rps_scenario_id, load_zone, year, 0.625 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2035
+union
+select 2 as rps_scenario_id, load_zone, year, 0.65 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2036
+union
+select 2 as rps_scenario_id, load_zone, year, 0.675 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2037
+union
+select 2 as rps_scenario_id, load_zone, year, 0.7 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2038
+union
+select 2 as rps_scenario_id, load_zone, year, 0.725 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2039
+union
+select 2 as rps_scenario_id, load_zone, year, 0.75 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2040
+union
+select 2 as rps_scenario_id, load_zone, year, 0.775 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2041
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.8 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2042
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.825 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2043
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.85 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2044
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.875 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2045
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.9 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2046
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.925 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2047
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.95 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2048
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 0.975 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year = 2049
+ 
+union
+select 2 as rps_scenario_id, load_zone, year, 1 as rps_target
+from rps_target
+where rps_scenario_id=1
+and year >= 2050
+order by 2, 3 
+;
