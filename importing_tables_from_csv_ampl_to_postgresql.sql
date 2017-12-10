@@ -1126,6 +1126,30 @@ from ampl_carbon_cap_targets
 where carbon_cap_scenario_id = 2
 order by year;
 
+
+-- So fancy. CA's cap
+ALTER TABLE carbon_cap ADD column carbon_cap_tco2_per_yr_CA DOUBLE PRECISION;
+
+insert into carbon_cap
+select 89 as carbon_cap_scenario_id, '[CEC] WECC and CA' carbon_cap_scenario_name, year, 
+wecc.carbon_emissions_relative_to_base*( select emissions_tCO2 from carbon_emissions_historical where year=1990) as carbon_cap_tco2_per_yr,
+ca.carbon_emissions_relative_to_base*( select emissions_tCO2/3 from carbon_emissions_historical where year=1990) as carbon_cap_tco2_per_yr_CA
+from ampl_carbon_cap_targets as wecc
+join ampl_carbon_cap_targets as ca using(year)
+where wecc.carbon_cap_scenario_id = 35
+and ca.carbon_cap_scenario_id = 81
+order by year;
+
+insert into carbon_cap (carbon_cap_scenario_id, carbon_cap_scenario_name, year, carbon_cap_tco2_per_yr, carbon_cap_tco2_per_yr_CA)
+select 90 as carbon_cap_scenario_id, '[CEC] WECC and CA, WECC: 15% by 2050 minus 20 mton/yr from industry, CA 60% by 2030' carbon_cap_scenario_name, year, 
+wecc.carbon_cap_tco2_per_yr as carbon_cap_tco2_per_yr,
+ca.carbon_emissions_relative_to_base*49000000 as carbon_cap_tco2_per_yr_CA -- 49 MMTCO2 were emitted in 1990 in-state in CA. https://www.arb.ca.gov/cc/inventory/pubs/reports/staff_report_1990_level.pdf
+from carbon_cap as wecc
+join ampl_carbon_cap_targets as ca using(year)
+where wecc.carbon_cap_scenario_id = 87
+and ca.carbon_cap_scenario_id = 81
+order by year;
+
 ---------------------------------------------------------------------------
 -- EV and DR 
 ---------------------------------------------------------------------------
@@ -2138,6 +2162,287 @@ values (61,
 		1, -- zone_to_regional_fuel_market_scenario_id
 		1 -- rps_scenario_id
 		);
+
+-- toy to test CA carbon cap
+insert into scenario
+values (62, 
+		'toy Frozen, cat3, new carbon cap', 
+		'WECC and CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		2, -- study_timeframe_id
+		2, -- time_sample_id
+		111, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+		
+		
+-- CA CARBON CAP AND WECC CAP. -------------------------------------------------------------------------
+
+insert into scenario
+values (143, 
+		'[CCC3] Frozen, cat3, WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		111, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (144, 
+		'[CCC3] Interm eff no elect, cat3, WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		112, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (145, 
+		'[CCC3] Interm eff + elect, cat3, WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		113, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (146, 
+		'[CCC3] Agg eff no elect, cat3, WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		114, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (147, 
+		'[CCC3] Agg eff + elect, cat3, WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		115, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+-- EV+DR scenarios
+insert into scenario
+values (148, 
+		'[CCC3] EV+DR Agg eff no elect, cat3,WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		116, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1, -- rps_scenario_id
+		1, --enable_dr
+		1 -- enable_ev
+		);
+
+insert into scenario
+values (149, 
+		'[CCC3] EV+DR Agg eff + elect, cat3,WECC CA cap', 
+		'WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		117, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1, -- rps_scenario_id
+		1, --enable_dr
+		1 -- enable_ev
+		);
+
+-- climate change runs -----------------------------------------------------------------------------
+insert into scenario
+values (150, 
+		'[CCC3] CanESM2 corr, cat3, agg eff w elec', 
+		'WECC CA cap. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		129, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		12, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (151, 
+		'[CCC3] HadGEM2ES corr, cat3, agg eff w elec', 
+		'WECC CA cap. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		131, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		13, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (152, 
+		'[CCC3] MIROC5 corr, cat3, agg eff w elec', 
+		'WECC CA cap. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		133, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		14, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+-- 0% carbon cap by 2040 and delta_MW from climate change divided by three... how are we going to justify this?...
+
+insert into scenario
+values (153, 
+		'[CCC3] zero carbon, CanESM2 corr, agg eff w elec', 
+		'zero carbon by 2040. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		129, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		12, -- hydro_simple_scenario_id
+		88, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (154, 
+		'[CCC3] zero carbon, HadGEM2ES corr, agg eff w elec', 
+		'zero carbon by 2040. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		131, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		13, -- hydro_simple_scenario_id
+		88, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+insert into scenario
+values (155, 
+		'[CCC3] zero carbon, MIROC5 corr, agg eff w elec', 
+		'zero carbon by 2040. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		133, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		14, -- hydro_simple_scenario_id
+		88, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
+
+
+
 
 
 		
