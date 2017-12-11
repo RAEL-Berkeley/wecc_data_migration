@@ -2441,9 +2441,47 @@ values (155,
 		1 -- rps_scenario_id
 		);
 
+-- DR and no EV to make it similar to CCC2. --------------------------------------------------------
 
+insert into scenario
+values (156, 
+		'[CCC3] DR Agg eff + elect, WECC CA cap', 
+		'DR no EV. WECC CA cap. Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		115, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		11, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1, -- rps_scenario_id
+		1 --enable_dr
+		);
 
+-- Cheap storage and HadGEM2ES --------------------- (storage 40% cheaper)
 
-
+insert into scenario
+values (157, 
+		'[CCC3] cheap sto, HadGEM2ES corr, agg eff w elec', 
+		'Storage 40% cheaper. WECC CA cap. Loads and hydro under CC (delta_MW divided by 3). Updated overnight_cost (E3 4% decr), updated gen listings (env cat 3), 2017 fuel costs from EIA, 2016 dollars, supply curve for Bio_Solid, current RPS and stronger carbon cap to account for industrys emissions',
+		3, -- study_timeframe_id
+		3, -- time_sample_id
+		131, -- demand_scenario_id
+		3, -- fuel_simple_price_scenario, without Bio_Solid costs, because they are provided by supply curve
+		14, -- generation_plant_scenario_id
+		6, -- generation_plant_cost_scenario_id
+		3, -- generation_plant_existing_and_planned_scenario_id
+		13, -- hydro_simple_scenario_id
+		90, -- carbon_cap_scenario_id
+		1, -- supply_curve_scenario_id
+		1, -- regional_fuel_market_scenario_id
+		1, -- zone_to_regional_fuel_market_scenario_id
+		1 -- rps_scenario_id
+		);
 		
 select * from scenario;
